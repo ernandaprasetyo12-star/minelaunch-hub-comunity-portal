@@ -1,0 +1,6 @@
+{
+  "name": "MineLaunch Hub - Launcher Minecraft Java & Keamanan",
+  "description": "Katalog dan tempat unduh launcher Minecraft Java Edition terlengkap: resmi berlisensi, non-lisensi via Ely.by, serta peringatan investigasi launcher berisiko tinggi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
