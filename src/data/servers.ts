@@ -23,7 +23,7 @@ export const INDO_SERVERS: ServerItem[] = [
   {
     id: 'kaizen-network',
     name: 'Kaizen Network Indonesia',
-    ip: 'play.kaizenmc.id',
+    ip: 'mp.kaizenmc.id',
     bedrockPort: 19132,
     country: 'ID',
     countryFlag: '🇮🇩',

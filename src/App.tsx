@@ -29,6 +29,7 @@ import { PotatoLaptopModal } from './components/PotatoLaptopModal';
 import { CraftAiModal } from './components/CraftAiModal';
 import { MineLaunchDownloadModal } from './components/MineLaunchDownloadModal';
 import { ServersPage } from './components/ServersPage';
+import { ModsPage } from './components/ModsPage';
 import { ShieldCheck, Sparkles, Compass } from 'lucide-react';
 
 export default function App() {
@@ -365,6 +366,13 @@ export default function App() {
             <ServersPage
               onNavigate={handleNavigate}
               onOpenTour={() => setIsTourModalOpen(true)}
+            />
+          )}
+
+          {/* PAGE 7: MODS & ADDONS INTEGRATION (MODRINTH / CURSEFORGE) */}
+          {currentView === 'mods' && (
+            <ModsPage
+              onNavigate={handleNavigate}
             />
           )}
 

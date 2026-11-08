@@ -156,6 +156,14 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </button>
 
                 <button
+                  onClick={() => onNavigate('mods')}
+                  className="inline-flex items-center gap-2 rounded-xl border border-orange-800/80 bg-orange-950/40 px-4 py-2.5 text-sm font-semibold text-orange-300 hover:bg-orange-900/50 transition-all"
+                >
+                  <Sparkles className="h-4 w-4 text-orange-400" />
+                  <span>Mods &amp; Addons</span>
+                </button>
+
+                <button
                   onClick={() => onNavigate('dangerous')}
                   className="inline-flex items-center gap-2 rounded-xl border border-red-800/80 bg-red-950/40 px-4 py-2.5 text-sm font-semibold text-red-300 hover:bg-red-900/50 transition-all"
                 >
@@ -277,6 +285,33 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
             <div className="mt-5 pt-4 border-t border-neutral-800/80 flex items-center justify-between text-xs font-semibold text-sky-400 group-hover:translate-x-0.5 transition-transform">
               <span>Buka Launcher Non-Lisensi</span>
+              <ArrowRight className="h-4 w-4" />
+            </div>
+          </div>
+
+          {/* Portal 3.5: Mods & Addons Integration */}
+          <div 
+            onClick={() => onNavigate('mods')}
+            className="group cursor-pointer rounded-2xl border border-orange-900/50 bg-neutral-900/60 p-6 hover:border-orange-500 hover:bg-neutral-900 transition-all hover:shadow-xl hover:shadow-orange-950/30 flex flex-col justify-between"
+          >
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-950 text-orange-400 border border-orange-800/80 group-hover:scale-105 transition-transform">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-bold text-orange-400 bg-orange-950/80 border border-orange-800 px-2.5 py-1 rounded-md">
+                  Modrinth & CurseForge
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">
+                Integrasi Mods & Addons
+              </h3>
+              <p className="text-xs text-neutral-300 leading-relaxed">
+                Database mod Minecraft populer dari Modrinth dan CurseForge. Sodium, Iris, JourneyMap, JEI, dan ribuan mod lainnya untuk optimasi & fitur baru.
+              </p>
+            </div>
+            <div className="mt-5 pt-4 border-t border-neutral-800/80 flex items-center justify-between text-xs font-semibold text-orange-400 group-hover:translate-x-0.5 transition-transform">
+              <span>Jelajahi Pustaka Mod</span>
               <ArrowRight className="h-4 w-4" />
             </div>
           </div>
