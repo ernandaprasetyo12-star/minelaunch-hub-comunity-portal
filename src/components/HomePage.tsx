@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Info,
   Settings,
-  Sliders
+  Sliders,
+  Cpu
 } from 'lucide-react';
 import { AppViewMode } from './Navbar';
 import { LauncherItem } from '../data/launchers';
@@ -26,6 +27,8 @@ interface HomePageProps {
   onOpenSafetyChecklist: () => void;
   onOpenTour: () => void;
   onOpenSettings?: () => void;
+  onOpenPotatoModal: () => void;
+  onOpenCraftAi: () => void;
   onOpenInvestigation: (launcher: LauncherItem) => void;
   onOpenDetail: (launcher: LauncherItem) => void;
   sampleLaunchers: {
@@ -42,6 +45,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenSafetyChecklist,
   onOpenTour,
   onOpenSettings,
+  onOpenPotatoModal,
+  onOpenCraftAi,
   onOpenInvestigation,
   onOpenDetail,
   sampleLaunchers
@@ -51,8 +56,8 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* 1. HERO SECTION WITH MINELAUNCH HUB COMMUNITY BRANDING */}
       <section className="relative overflow-hidden border-b border-neutral-800 bg-neutral-950">
         <div className="absolute inset-0 z-0 opacity-20 mix-blend-luminosity pointer-events-none">
-          <img
-            src="/src/assets/images/mc_launchers_hero_1794042691092.jpg"
+          <SafeImage
+            src="/assets/images/mc_launchers_hero_1794042691092.jpg"
             alt="Minecraft Background"
             className="h-full w-full object-cover"
           />
@@ -73,7 +78,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               <div className="flex items-start gap-4">
-                <img
+                <SafeImage
                   src="/assets/minelaunch_hub_logo.png"
                   alt="MineLaunch Hub Community"
                   className="hidden sm:block h-20 w-20 rounded-2xl object-cover ring-2 ring-emerald-500/40 shadow-xl shadow-emerald-950/50 shrink-0"
@@ -98,6 +103,15 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <Layers className="h-4 w-4" />
                   <span>Buka Katalog Semua Launcher</span>
                 </button>
+
+                <button
+                  onClick={onOpenPotatoModal}
+                  className="inline-flex items-center gap-2 rounded-xl border border-amber-500/80 bg-amber-950/50 px-4 py-2.5 text-sm font-bold text-amber-300 hover:bg-amber-900/60 transition-all shadow-md shadow-amber-950/40 animate-pulse"
+                >
+                  <Cpu className="h-4 w-4 text-amber-400" />
+                  <span>💻 Laptop Kamu Kentang? (Pilih Ringan)</span>
+                </button>
+
 
                 <button
                   onClick={() => onNavigate('licensed')}
@@ -485,6 +499,38 @@ export const HomePage: React.FC<HomePageProps> = ({
           </button>
         </div>
       </section>
+
+      {/* 5. VIRUSTOTAL SECURITY CHECK BANNER */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-2xl border border-sky-900/60 bg-gradient-to-r from-sky-950/40 via-neutral-900 to-neutral-950 p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex items-center gap-2 text-xs font-bold text-sky-400 uppercase tracking-wider">
+              <ExternalLink className="h-4 w-4" />
+              <span>Pemeriksaan Antivirus Online</span>
+            </div>
+            <h3 className="text-xl font-bold text-white">
+              Mau cek launcher aman? Kunjungi VirusTotal
+            </h3>
+            <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+              Anda dapat mengunggah berkas installer atau file .exe peluncur apa pun ke VirusTotal untuk dipindai oleh 70+ mesin antivirus engine dunia secara gratis.
+            </p>
+          </div>
+          <a
+            href="https://www.virustotal.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-sky-950 hover:bg-sky-500 transition-all shrink-0"
+          >
+            <ExternalLink className="h-4 w-4" />
+            <span>Kunjungi VirusTotal.com</span>
+          </a>
+        </div>
+      </section>
+
+      {/* Community Minecraft Hub Bottom Watermark */}
+      <div className="pt-6 text-center text-xs font-mono text-neutral-400 tracking-wider uppercase border-t border-neutral-800/80">
+        Community Minecraft Hub 2025 ©
+      </div>
     </div>
   );
 };

@@ -1,0 +1,6 @@
+{
+  "summary":  "Rencana implementasi konfigurasi multi-platform deployment (Netlify, Firebase Hosting, Vercel, dan GitHub Pages) untuk aplikasi MineLaunch Hub sebagai SPA static build (dist). Menyediakan file netlify.toml, _redirects, firebase.json, vercel.json, 404.html, perbaikan warning Vite build, serta panduan langkah deploy step-by-step.",
+  "updatedAt":  "2026-11-08T05:59:51.872246138Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

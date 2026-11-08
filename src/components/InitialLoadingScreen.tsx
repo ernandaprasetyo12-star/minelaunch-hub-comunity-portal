@@ -130,6 +130,11 @@ export const InitialLoadingScreen: React.FC<InitialLoadingScreenProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Requested Copyright Notice */}
+        <div className="pt-2 border-t border-white/10 text-[10px] text-neutral-400 tracking-wider uppercase font-mono">
+          Community Minecraft Hub 2025 ©
+        </div>
       </div>
     </div>
   );

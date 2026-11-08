@@ -25,6 +25,8 @@ import { InitialLoadingScreen } from './components/InitialLoadingScreen';
 import { InitialLoginGatekeeper } from './components/InitialLoginGatekeeper';
 import { FullScreenTourModal } from './components/FullScreenTourModal';
 import { Footer } from './components/Footer';
+import { PotatoLaptopModal } from './components/PotatoLaptopModal';
+import { CraftAiModal } from './components/CraftAiModal';
 import { ShieldCheck, Sparkles, Compass } from 'lucide-react';
 
 export default function App() {
@@ -79,6 +81,8 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isTourModalOpen, setIsTourModalOpen] = useState<boolean>(false);
+  const [isPotatoModalOpen, setIsPotatoModalOpen] = useState<boolean>(false);
+  const [isCraftAiOpen, setIsCraftAiOpen] = useState<boolean>(false);
 
   // User state
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
@@ -270,6 +274,8 @@ export default function App() {
               onOpenSafetyChecklist={() => setIsSafetyChecklistOpen(true)}
               onOpenTour={() => setIsTourModalOpen(true)}
               onOpenSettings={() => setIsSettingsOpen(true)}
+              onOpenPotatoModal={() => setIsPotatoModalOpen(true)}
+              onOpenCraftAi={() => setIsCraftAiOpen(true)}
               onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
               onOpenDetail={(launcher) => setDetailLauncher(launcher)}
               sampleLaunchers={sampleLaunchers}
@@ -434,6 +440,39 @@ export default function App() {
           else handleNavigate('catalog');
         }}
       />
+
+      {/* Potato Laptop Recommendations Modal */}
+      <PotatoLaptopModal
+        isOpen={isPotatoModalOpen}
+        onClose={() => setIsPotatoModalOpen(false)}
+        onOpenDetail={(launcher) => setDetailLauncher(launcher)}
+        onNavigate={handleNavigate}
+      />
+
+      {/* Craft AI Assistant Modal */}
+      <CraftAiModal
+        isOpen={isCraftAiOpen}
+        onClose={() => setIsCraftAiOpen(false)}
+      />
+
+      {/* Floating Action Button (FAB) for Craft AI with custom uploaded image icon */}
+      <div className="fixed bottom-20 right-5 z-40">
+        <button
+          onClick={() => setIsCraftAiOpen(true)}
+          className="group relative flex items-center justify-center h-14 w-14 rounded-full bg-neutral-900 shadow-2xl shadow-emerald-950 hover:scale-110 active:scale-95 ring-4 ring-emerald-500/60 transition-all overflow-hidden"
+          title="Tanya Craft AI"
+        >
+          <img
+            src="/assets/aistudio/image_623e557a.png"
+            alt="Craft AI"
+            className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
+          />
+          <div className="absolute inset-0 bg-emerald-500/10 mix-blend-overlay pointer-events-none" />
+          <span className="absolute -top-8 bg-neutral-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-emerald-500/40">
+            Tanya Craft AI 🤖
+          </span>
+        </button>
+      </div>
     </div>
   );
 }
