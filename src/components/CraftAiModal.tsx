@@ -63,20 +63,38 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
         body: JSON.stringify({ message: userMsg.text, history }),
       });
 
-      const data = await res.json();
-      if (res.ok && data.reply) {
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {
+        // Not JSON (e.g. static hosting 404 HTML fallback)
+      }
+
+      if (res.ok && data && data.reply) {
         setMessages((prev) => [...prev, { role: 'model', text: data.reply }]);
       } else {
-        setMessages((prev) => [
-          ...prev, 
-          { role: 'model', text: 'Maaf, Craft AI sedang mengalami kendala koneksi server. Silakan coba beberapa saat lagi.' }
-        ]);
+        // Intelligent offline / static deployment fallback responses
+        const queryLower = text.toLowerCase();
+        let fallbackReply = "Halo! Craft AI merespons dalam mode Offline/Statis (backend Node.js tidak aktif di hosting ini). Untuk kebutuhan Minecraft, gunakan Prism Launcher (resmi) atau XMCL / SKLauncher (Ely.by) yang aman dari malware.";
+        
+        if (queryLower.includes('ringan') || queryLower.includes('kentang') || queryLower.includes('ram')) {
+          fallbackReply = "Untuk PC/laptop kentang (RAM 4GB), sangat disarankan menggunakan SKLauncher atau Feather Client dengan alokasi RAM 2GB serta menginstal mod Sodium (Fabric) untuk mendongkrak FPS secara drastis!";
+        } else if (queryLower.includes('tlauncher') || queryLower.includes('bahaya') || queryLower.includes('virus')) {
+          fallbackReply = "Waspada terhadap TLauncher (TLMedia)! Berdasarkan investigasi Wikipedia dan komunitas, launcher tersebut mencuri data sesi Minecraft dan membajak file hosts Windows. Gunakan alternatif bersih seperti XMCL atau SKLauncher.";
+        } else if (queryLower.includes('ely') || queryLower.includes('skin')) {
+          fallbackReply = "Akun Ely.by adalah solusi terbaik untuk bermain Minecraft non-lisensi dengan dukungan skin kustom, jubah (cape), dan sistem otorisasi yang aman tanpa risiko spyware.";
+        }
+
+        setMessages((prev) => [...prev, { role: 'model', text: fallbackReply }]);
       }
     } catch (err) {
-      setMessages((prev) => [
-        ...prev, 
-        { role: 'model', text: 'Terjadi kesalahan jaringan saat menghubungi Craft AI.' }
-      ]);
+      // Graceful offline fallback
+      const fallbackReplies = [
+        "Halo! Mode Craft AI Offline aktif. Pastikan Anda mengunduh launcher resmi seperti Prism Launcher atau XMCL untuk keamanan maksimal.",
+        "Untuk laptop kentang, gunakan SKLauncher dengan mod Sodium agar game berjalan sangat mulus."
+      ];
+      const reply = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
+      setMessages((prev) => [...prev, { role: 'model', text: reply }]);
     } finally {
       setIsLoading(false);
     }
