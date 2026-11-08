@@ -4,6 +4,8 @@ import {
   ArrowLeft, CheckCircle2, BookOpen, Terminal, Check, Globe 
 } from 'lucide-react';
 
+import { SafeImage } from './SafeImage';
+
 interface FullScreenTourModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -27,7 +29,7 @@ export const FullScreenTourModal: React.FC<FullScreenTourModalProps> = ({
       tagColor: 'text-emerald-400 bg-emerald-950/80 border-emerald-800',
       title: 'Selamat Datang di MineLaunch Hub: Panduan Launcher Terlengkap Dunia',
       subtitle: 'Memudahkan Anda menemukan launcher Minecraft Java Edition yang aman, sesuai kebutuhan, dan langsung dari sumber aslinya.',
-      image: '/src/assets/images/mc_launchers_hero_1794042691092.jpg',
+      image: '/assets/images/mc_launchers_hero_1794042691092.jpg',
       content: (
         <div className="space-y-4 text-xs sm:text-sm text-neutral-300 leading-relaxed">
           <p>
@@ -75,7 +77,7 @@ export const FullScreenTourModal: React.FC<FullScreenTourModalProps> = ({
       tagColor: 'text-emerald-400 bg-emerald-950/80 border-emerald-800',
       title: 'Apa Itu Minecraft yang Membutuhkan Lisensi Resmi?',
       subtitle: 'Game original berbayar dari Mojang Studios & Microsoft dengan hak akses tak terbatas.',
-      image: '/public/assets/aistudio/image_4b042a05.png', // User attachment of Prism
+      image: '/assets/aistudio/image_4b042a05.png', // User attachment of Prism
       content: (
         <div className="space-y-4 text-xs sm:text-sm text-neutral-300 leading-relaxed">
           <p>
@@ -109,7 +111,7 @@ export const FullScreenTourModal: React.FC<FullScreenTourModalProps> = ({
       tagColor: 'text-sky-400 bg-sky-950/80 border-sky-800',
       title: 'Apa Itu Minecraft Non-Lisensi via Ely.by tapi Bebas Virus?',
       subtitle: 'Solusi aman dan gratis bagi pemain non-lisensi untuk memiliki skin kustom dan jubah tanpa risiko malware.',
-      image: '/src/assets/images/elyby_custom_skin_1794042692330.jpg',
+      image: '/assets/images/elyby_custom_skin_1794042692330.jpg',
       content: (
         <div className="space-y-4 text-xs sm:text-sm text-neutral-300 leading-relaxed">
           <p>
@@ -146,7 +148,7 @@ export const FullScreenTourModal: React.FC<FullScreenTourModalProps> = ({
       tagColor: 'text-red-400 bg-red-950/80 border-red-800',
       title: 'Apa Itu Launcher Berbahaya? (Mengapa Masuk Daftar Hitam?)',
       subtitle: 'Waspadai program yang menyusupi file sistem, spyware tertutup, dan launcher kontroversial seperti TLauncher & Salwyrr.',
-      image: '/src/assets/images/mc_security_warning_1794042692098.jpg',
+      image: '/assets/images/mc_security_warning_1794042692098.jpg',
       content: (
         <div className="space-y-4 text-xs sm:text-sm text-neutral-300 leading-relaxed">
           <p>
@@ -187,7 +189,7 @@ export const FullScreenTourModal: React.FC<FullScreenTourModalProps> = ({
       tagColor: 'text-emerald-400 bg-emerald-950/80 border-emerald-800',
       title: 'Anda Siap Menjelajahi Direktori MineLaunch Hub!',
       subtitle: 'Gunakan filter kategori, sistem pencarian, dan tautan asli langsung ke website pengembang.',
-      image: '/public/assets/aistudio/image_7b152378.png', // User attachment of Modrinth
+      image: '/assets/aistudio/image_7b152378.png', // User attachment of Modrinth
       content: (
         <div className="space-y-4 text-xs sm:text-sm text-neutral-300 leading-relaxed">
           <p>
@@ -225,11 +227,10 @@ export const FullScreenTourModal: React.FC<FullScreenTourModalProps> = ({
       >
         {/* Banner with Scrim */}
         <div className="relative aspect-[21/9] sm:aspect-[16/6] w-full overflow-hidden bg-neutral-950">
-          <img
+          <SafeImage
             src={current.image}
             alt={current.title}
             className="h-full w-full object-cover transition-transform duration-500"
-            referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/50 to-transparent" />
 

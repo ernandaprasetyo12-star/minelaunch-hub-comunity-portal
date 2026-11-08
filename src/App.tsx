@@ -27,6 +27,7 @@ import { FullScreenTourModal } from './components/FullScreenTourModal';
 import { Footer } from './components/Footer';
 import { PotatoLaptopModal } from './components/PotatoLaptopModal';
 import { CraftAiModal } from './components/CraftAiModal';
+import { MineLaunchDownloadModal } from './components/MineLaunchDownloadModal';
 import { ShieldCheck, Sparkles, Compass } from 'lucide-react';
 
 export default function App() {
@@ -77,6 +78,7 @@ export default function App() {
   // Modals state
   const [detailLauncher, setDetailLauncher] = useState<LauncherItem | null>(null);
   const [investigationLauncher, setInvestigationLauncher] = useState<LauncherItem | null>(null);
+  const [downloadLauncher, setDownloadLauncher] = useState<LauncherItem | null>(null);
   const [isSafetyChecklistOpen, setIsSafetyChecklistOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
@@ -148,7 +150,7 @@ export default function App() {
       // Open Wikipedia warning dossier modal immediately!
       setInvestigationLauncher(launcher);
     } else {
-      setDetailLauncher(launcher);
+      setDownloadLauncher(launcher);
     }
   };
 
@@ -409,6 +411,23 @@ export default function App() {
           onClose={() => setDetailLauncher(null)}
           onOpenInvestigation={(item) => {
             setDetailLauncher(null);
+            setInvestigationLauncher(item);
+          }}
+          onTriggerDownload={(item) => {
+            setDetailLauncher(null);
+            setDownloadLauncher(item);
+          }}
+        />
+      )}
+
+      {/* MineLaunch Hub Verified Download Modal */}
+      {downloadLauncher && (
+        <MineLaunchDownloadModal
+          launcher={downloadLauncher}
+          isOpen={!!downloadLauncher}
+          onClose={() => setDownloadLauncher(null)}
+          onOpenInvestigation={(item) => {
+            setDownloadLauncher(null);
             setInvestigationLauncher(item);
           }}
         />

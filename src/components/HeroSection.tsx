@@ -1,6 +1,8 @@
 import React from 'react';
 import { ShieldCheck, AlertTriangle, Download, ArrowRight, HelpCircle } from 'lucide-react';
 
+import { SafeImage } from './SafeImage';
+
 interface HeroSectionProps {
   onSelectCategory: (category: string) => void;
   onOpenSafetyGuide: () => void;
@@ -18,11 +20,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     <section className="relative overflow-hidden border-b border-neutral-800 bg-neutral-950">
       {/* Background Graphic with scrim */}
       <div className="absolute inset-0 z-0 opacity-25 mix-blend-luminosity pointer-events-none">
-        <img
-          src="/src/assets/images/mc_launchers_hero_1794042691092.jpg"
+        <SafeImage
+          src="/assets/images/mc_launchers_hero_1794042691092.jpg"
           alt="Minecraft Java Edition Landscape & Launcher interface"
           className="h-full w-full object-cover"
-          referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/80 to-transparent" />
       </div>

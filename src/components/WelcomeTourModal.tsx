@@ -4,6 +4,8 @@ import {
   AlertTriangle, ArrowRight, ArrowLeft, CheckCircle2, User 
 } from 'lucide-react';
 
+import { SafeImage } from './SafeImage';
+
 interface WelcomeTourModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,7 +27,7 @@ export const WelcomeTourModal: React.FC<WelcomeTourModalProps> = ({
     {
       title: 'Selamat Datang di MineLaunch Hub!',
       subtitle: 'Memudahkan Anda Menemukan & Mengunduh Launcher Minecraft Java Edition',
-      image: '/src/assets/images/mc_launchers_hero_1794042691092.jpg',
+      image: '/assets/images/mc_launchers_hero_1794042691092.jpg',
       badge: 'Panduan Awal Pengguna',
       badgeColor: 'text-emerald-400',
       content: (
@@ -57,7 +59,7 @@ export const WelcomeTourModal: React.FC<WelcomeTourModalProps> = ({
     {
       title: 'Pahami Kebutuhan Lisensi: Resmi vs Ely.by',
       subtitle: 'Ketahui Launcher Mana yang Butuh Beli Game dan Mana yang Gratis',
-      image: '/src/assets/images/elyby_custom_skin_1794042692330.jpg',
+      image: '/assets/images/elyby_custom_skin_1794042692330.jpg',
       badge: 'Sistem Lisensi & Akun',
       badgeColor: 'text-sky-400',
       content: (
@@ -92,7 +94,7 @@ export const WelcomeTourModal: React.FC<WelcomeTourModalProps> = ({
     {
       title: 'Sistem Rating Keamanan & Peringatan Bahaya',
       subtitle: 'Waspada Sebelum Mengunduh: Investigasi Dossier Gaya Wikipedia',
-      image: '/src/assets/images/mc_security_warning_1794042692098.jpg',
+      image: '/assets/images/mc_security_warning_1794042692098.jpg',
       badge: 'Perlindungan Komunitas',
       badgeColor: 'text-red-400',
       content: (
@@ -118,7 +120,7 @@ export const WelcomeTourModal: React.FC<WelcomeTourModalProps> = ({
     {
       title: 'Hubungkan Akun Anda (Google, Microsoft, Ely.by)',
       subtitle: 'Personalisasi Profil & Pengalaman Menjelajah Anda',
-      image: '/src/assets/images/xmcl_community_brand_1794043502660.jpg',
+      image: '/assets/images/xmcl_community_brand_1794043502660.jpg',
       badge: 'Fitur Akun Interaktif',
       badgeColor: 'text-amber-400',
       content: (
@@ -156,11 +158,10 @@ export const WelcomeTourModal: React.FC<WelcomeTourModalProps> = ({
       >
         {/* Visual Banner */}
         <div className="relative aspect-[21/9] sm:aspect-[16/7] w-full overflow-hidden bg-neutral-950">
-          <img
+          <SafeImage
             src={current.image}
             alt={current.title}
             className="h-full w-full object-cover transition-all duration-500"
-            referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/40 to-transparent" />
 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { 
   ShieldAlert, Compass, User, LogOut, Sparkles, ShieldCheck, 
-  BookOpen, Layers, CheckSquare, BarChart3, Menu, X, Settings 
+  BookOpen, Layers, CheckSquare, BarChart3, Menu, X, Settings,
+  ArrowLeft
 } from 'lucide-react';
 import { UserProfile } from '../types/auth';
 import { SafeImage } from './SafeImage';
@@ -40,26 +41,40 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-0 z-40 w-full border-b border-neutral-800 bg-neutral-950/95 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        {/* Zone 1: Brand title wordmark with authentic uploaded Minelaunch Hub logo */}
-        <button
-          onClick={() => handleNavigate('home')}
-          className="flex items-center gap-2.5 text-left text-lg font-bold tracking-tight text-white transition-opacity hover:opacity-90 whitespace-nowrap shrink-0 group"
-        >
-          <img
-            src="/assets/minelaunch_hub_logo.png"
-            alt="MineLaunch Hub Community Logo"
-            className="h-10 w-10 rounded-lg object-cover shadow-sm ring-1 ring-emerald-500/30 group-hover:ring-emerald-400 transition-all"
-          />
-          <div className="flex flex-col text-left leading-none">
-            <div className="flex items-center gap-1.5">
-              <span className="text-emerald-400 font-extrabold tracking-tight">MineLaunch</span>
-              <span className="text-neutral-200 font-bold">Hub</span>
+        {/* Zone 1: Brand title wordmark & Back Button */}
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => handleNavigate('home')}
+            className="flex items-center gap-2.5 text-left text-lg font-bold tracking-tight text-white transition-opacity hover:opacity-90 whitespace-nowrap shrink-0 group"
+          >
+            <img
+              src="/assets/minelaunch_hub_logo.png"
+              alt="MineLaunch Hub Community Logo"
+              className="h-10 w-10 rounded-lg object-cover shadow-sm ring-1 ring-emerald-500/30 group-hover:ring-emerald-400 transition-all"
+            />
+            <div className="flex flex-col text-left leading-none">
+              <div className="flex items-center gap-1.5">
+                <span className="text-emerald-400 font-extrabold tracking-tight">MineLaunch</span>
+                <span className="text-neutral-200 font-bold">Hub</span>
+              </div>
+              <span className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold mt-0.5">
+                Community Portal
+              </span>
             </div>
-            <span className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold mt-0.5">
-              Community Portal
-            </span>
-          </div>
-        </button>
+          </button>
+
+          {/* Dedicated Back Button when not on home */}
+          {currentView !== 'home' && (
+            <button
+              onClick={() => handleNavigate('home')}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/60 bg-emerald-950/60 px-3 py-1.5 text-xs font-bold text-emerald-300 hover:bg-emerald-900/80 hover:text-white transition-all shadow-sm"
+              title="Kembali ke Beranda Utama"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Kembali</span>
+            </button>
+          )}
+        </div>
 
         {/* Zone 2: Navigation Links (single-line, hover underlines) */}
         <nav className="hidden lg:flex items-center gap-4 text-xs font-semibold text-neutral-300">

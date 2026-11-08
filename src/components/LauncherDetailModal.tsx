@@ -12,6 +12,7 @@ interface LauncherDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenInvestigation: (launcher: LauncherItem) => void;
+  onTriggerDownload?: (launcher: LauncherItem) => void;
 }
 
 export const LauncherDetailModal: React.FC<LauncherDetailModalProps> = ({
@@ -19,6 +20,7 @@ export const LauncherDetailModal: React.FC<LauncherDetailModalProps> = ({
   isOpen,
   onClose,
   onOpenInvestigation,
+  onTriggerDownload,
 }) => {
   if (!isOpen || !launcher) return null;
 
@@ -54,7 +56,7 @@ export const LauncherDetailModal: React.FC<LauncherDetailModalProps> = ({
             <SafeImage
               src={launcher.image}
               alt={`Tampilan software ${launcher.name}`}
-              className="h-full w-full object-cover"
+              className={`h-full w-full ${launcher.id === 'freesm-launcher' ? 'object-contain p-2' : 'object-cover'}`}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
             
@@ -247,15 +249,19 @@ export const LauncherDetailModal: React.FC<LauncherDetailModalProps> = ({
                 </button>
               ) : (
                 <>
-                  <a
-                    href={launcher.downloadUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-500 transition-colors shadow-sm"
+                  <button
+                    onClick={() => {
+                      if (onTriggerDownload) {
+                        onTriggerDownload(launcher);
+                      } else {
+                        window.open(launcher.downloadUrl, '_blank');
+                      }
+                    }}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-500 transition-colors shadow-sm cursor-pointer"
                   >
                     <Download className="h-4 w-4" />
-                    <span>Unduh di Situs Resmi ({launcher.name})</span>
-                  </a>
+                    <span>Unduh via MineLaunch Hub ({launcher.name})</span>
+                  </button>
 
                   <a
                     href={launcher.websiteUrl}

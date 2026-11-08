@@ -25,12 +25,13 @@ export const LauncherCard: React.FC<LauncherCardProps> = ({
 
   return (
     <div
-      className={`group relative flex flex-col rounded-2xl border transition-all duration-200 overflow-hidden ${
+      onClick={() => (isDangerous ? onOpenInvestigation(launcher) : onOpenDetails(launcher))}
+      className={`group relative flex flex-col rounded-2xl border transition-all duration-200 overflow-hidden cursor-pointer ${
         isDangerous
-          ? 'border-red-900/60 bg-gradient-to-b from-neutral-900 to-red-950/20 hover:border-red-700/80 shadow-sm shadow-red-950/30'
+          ? 'border-red-900/60 bg-gradient-to-b from-neutral-900 to-red-950/20 hover:border-red-700/80 hover:scale-[1.01] shadow-sm shadow-red-950/30'
           : isLicensed
-          ? 'border-neutral-800 bg-neutral-900/60 hover:border-emerald-600/50 hover:bg-neutral-900/90'
-          : 'border-neutral-800 bg-neutral-900/60 hover:border-sky-600/50 hover:bg-neutral-900/90'
+          ? 'border-neutral-800 bg-neutral-900/60 hover:border-emerald-600/50 hover:bg-neutral-900/90 hover:scale-[1.01]'
+          : 'border-neutral-800 bg-neutral-900/60 hover:border-sky-600/50 hover:bg-neutral-900/90 hover:scale-[1.01]'
       }`}
     >
       {/* Visual Header / Brand Artwork */}
@@ -38,7 +39,7 @@ export const LauncherCard: React.FC<LauncherCardProps> = ({
         <SafeImage
           src={launcher.image}
           alt={`Brand visual dan screenshot untuk ${launcher.name}`}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className={`h-full w-full ${launcher.id === 'freesm-launcher' ? 'object-contain p-2' : 'object-cover'} transition-transform duration-300 group-hover:scale-105`}
         />
 
         {/* Scrim Overlay */}
@@ -188,11 +189,11 @@ export const LauncherCard: React.FC<LauncherCardProps> = ({
             </>
           ) : (
             <>
-              {/* Direct Website link as requested by user */}
               <a
                 href={launcher.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
                 className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white transition-colors whitespace-nowrap shadow-sm ${
                   isLicensed
                     ? 'bg-emerald-600 hover:bg-emerald-500'
@@ -205,9 +206,12 @@ export const LauncherCard: React.FC<LauncherCardProps> = ({
               </a>
 
               <button
-                onClick={() => onOpenDetails(launcher)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTriggerDownload(launcher);
+                }}
                 className="inline-flex items-center justify-center rounded-lg border border-neutral-700 bg-neutral-800/80 px-3 py-2 text-xs font-medium text-neutral-200 hover:bg-neutral-700 hover:text-white transition-colors whitespace-nowrap"
-                title="Lihat spesifikasi & opsi download"
+                title="Unduh langsung di MineLaunch Hub"
               >
                 <Download className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline ml-1">Unduh</span>

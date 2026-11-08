@@ -443,7 +443,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <SafeImage
                     src={sampleLaunchers.freesm.image}
                     alt={sampleLaunchers.freesm.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain p-1.5"
                   />
                   <div className="absolute top-2 left-2 bg-purple-950/90 border border-purple-700/80 text-purple-300 text-[10px] font-bold px-2 py-0.5 rounded">
                     PRISM FORK BEBAS (NEW)
