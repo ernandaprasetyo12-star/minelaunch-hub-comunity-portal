@@ -5,6 +5,7 @@ import {
   CheckCircle2, XCircle, Github, Monitor, HardDrive, Cpu, 
   FileText
 } from 'lucide-react';
+import { SafeImage } from './SafeImage';
 
 interface LauncherDetailModalProps {
   launcher: LauncherItem | null;
@@ -50,11 +51,10 @@ export const LauncherDetailModal: React.FC<LauncherDetailModalProps> = ({
         <div className="overflow-y-auto p-5 sm:p-6 space-y-6">
           {/* Hero Banner / Preview */}
           <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950">
-            <img
+            <SafeImage
               src={launcher.image}
               alt={`Tampilan software ${launcher.name}`}
               className="h-full w-full object-cover"
-              referrerPolicy="no-referrer"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
             

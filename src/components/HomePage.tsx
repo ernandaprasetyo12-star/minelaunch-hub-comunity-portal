@@ -13,15 +13,19 @@ import {
   CheckSquare, 
   ExternalLink,
   ChevronRight,
-  Info
+  Info,
+  Settings,
+  Sliders
 } from 'lucide-react';
 import { AppViewMode } from './Navbar';
 import { LauncherItem } from '../data/launchers';
+import { SafeImage } from './SafeImage';
 
 interface HomePageProps {
   onNavigate: (view: AppViewMode) => void;
   onOpenSafetyChecklist: () => void;
   onOpenTour: () => void;
+  onOpenSettings?: () => void;
   onOpenInvestigation: (launcher: LauncherItem) => void;
   onOpenDetail: (launcher: LauncherItem) => void;
   sampleLaunchers: {
@@ -37,6 +41,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   onNavigate,
   onOpenSafetyChecklist,
   onOpenTour,
+  onOpenSettings,
   onOpenInvestigation,
   onOpenDetail,
   sampleLaunchers
@@ -344,8 +349,8 @@ export const HomePage: React.FC<HomePageProps> = ({
           {sampleLaunchers.prism && (
             <div className="rounded-2xl border border-emerald-900/60 bg-neutral-900/70 p-5 space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="relative aspect-video rounded-xl overflow-hidden border border-neutral-800">
-                  <img
+                <div className="relative aspect-video rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950">
+                  <SafeImage
                     src={sampleLaunchers.prism.image}
                     alt={sampleLaunchers.prism.name}
                     className="w-full h-full object-cover"
@@ -382,8 +387,8 @@ export const HomePage: React.FC<HomePageProps> = ({
           {sampleLaunchers.xmcl && (
             <div className="rounded-2xl border border-sky-900/60 bg-neutral-900/70 p-5 space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="relative aspect-video rounded-xl overflow-hidden border border-neutral-800">
-                  <img
+                <div className="relative aspect-video rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950">
+                  <SafeImage
                     src={sampleLaunchers.xmcl.image}
                     alt={sampleLaunchers.xmcl.name}
                     className="w-full h-full object-cover"
@@ -420,8 +425,8 @@ export const HomePage: React.FC<HomePageProps> = ({
           {sampleLaunchers.freesm && (
             <div className="rounded-2xl border border-purple-900/60 bg-neutral-900/70 p-5 space-y-4 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="relative aspect-video rounded-xl overflow-hidden border border-neutral-800">
-                  <img
+                <div className="relative aspect-video rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950">
+                  <SafeImage
                     src={sampleLaunchers.freesm.image}
                     alt={sampleLaunchers.freesm.name}
                     className="w-full h-full object-cover"

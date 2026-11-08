@@ -97,7 +97,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://www.minecraft.net/en-us/download',
     minRam: '4 GB',
     features: ['Official Snapshots', 'Bedrock & Java Switcher', 'Microsoft 2FA Support', 'Realms Access'],
-    image: '/public/assets/aistudio/image_a3ed8944.png', // Official Minecraft Launcher screenshot
+    image: '/assets/aistudio/image_a3ed8944.png', // Official Minecraft Launcher screenshot
     brandColor: '#10b981'
   },
   // 2. Prism Launcher
@@ -139,7 +139,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/PrismLauncher/PrismLauncher',
     minRam: '2 GB',
     features: ['Multi-Instance', 'Modrinth Direct Search', 'CurseForge Direct Search', 'Custom Java Flags', 'Auto Java Downloader'],
-    image: '/public/assets/aistudio/image_4b042a05.png', // Prism Launcher screenshot
+    image: '/assets/aistudio/image_4b042a05.png', // Prism Launcher screenshot
     brandColor: '#6366f1'
   },
   // 3. Modrinth App
@@ -180,7 +180,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/modrinth/theseus',
     minRam: '2 GB',
     features: ['Rust/Tauri Native Engine', '1-Click Mod Updating', 'Modrinth Ecosystem', 'Clean Modern Dark UI'],
-    image: '/public/assets/aistudio/image_7b152378.png', // Modrinth App screenshot
+    image: '/assets/aistudio/image_7b152378.png', // Modrinth App screenshot
     brandColor: '#10b981'
   },
   // 4. CurseForge App
@@ -220,7 +220,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://www.curseforge.com/download/app',
     minRam: '6 GB',
     features: ['Massive Modpack Library', 'One-Click Modpack Installs', 'Mod Creator Support', 'World Exporting'],
-    image: '/public/assets/aistudio/image_08039985.png', // CurseForge App screenshot
+    image: '/assets/aistudio/image_08039985.png', // CurseForge App screenshot
     brandColor: '#f97316'
   },
   // 5. Lunar Client
@@ -260,7 +260,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://www.lunarclient.com/download',
     minRam: '4 GB',
     features: ['Built-in FPS Optimization', 'Over 100+ PvP Mods', 'Hypixel Ready', 'Cosmetics System'],
-    image: '/public/assets/aistudio/image_eaefbe3e.png', // Lunar Client screenshot
+    image: '/assets/aistudio/image_eaefbe3e.png', // Lunar Client screenshot
     brandColor: '#38bdf8'
   },
   // 6. Badlion Client
@@ -300,7 +300,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://client.badlion.net/download',
     minRam: '4 GB',
     features: ['Replay Mod Built-in', 'Iris & Sodium Support', 'PvP HUD', 'Anticheat Integration'],
-    image: '/public/assets/aistudio/image_4942b67c.png', // Badlion Client screenshot
+    image: '/assets/aistudio/image_4942b67c.png', // Badlion Client screenshot
     brandColor: '#eab308'
   },
   // 7. GDLauncher Carbon
@@ -341,7 +341,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/gorilladev/GDLauncher',
     minRam: '3 GB',
     features: ['CurseForge & Modrinth Support', 'Cloud Sync', 'Automatic Java Setup'],
-    image: '/public/assets/aistudio/image_af2847ed.png', // GDLauncher screenshot
+    image: '/assets/aistudio/image_af2847ed.png', // GDLauncher screenshot
     brandColor: '#8b5cf6'
   },
   // 8. ATLauncher
@@ -382,7 +382,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/ATLauncher/ATLauncher',
     minRam: '2 GB',
     features: ['1-Click Server Creation', 'Multi-Platform Mods', 'Backup Manager'],
-    image: '/public/assets/aistudio/image_9ae73846.png', // ATLauncher screenshot
+    image: '/assets/aistudio/image_9ae73846.png', // ATLauncher screenshot
     brandColor: '#0ea5e9'
   },
   // 9. MultiMC 5
@@ -423,7 +423,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/MultiMC/Launcher',
     minRam: '2 GB',
     features: ['Legacy Multi-Instance', 'Java Isolation', 'Lightweight Footprint'],
-    image: '/public/assets/aistudio/image_8a643dac.png', // MultiMC screenshot
+    image: '/assets/aistudio/image_8a643dac.png', // MultiMC screenshot
     brandColor: '#22c55e'
   },
   // 10. FTB App
@@ -463,7 +463,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://feed-the-beast.com/app',
     minRam: '6 GB',
     features: ['Exclusive FTB Modpacks', 'Cloud Backup', 'Instance Cloning', 'Auto Java Config'],
-    image: '/public/assets/aistudio/image_07b25862.png', // FTB App screenshot
+    image: '/assets/aistudio/image_07b25862.png', // FTB App screenshot
     brandColor: '#ea580c'
   },
   // 11. Technic Launcher
@@ -503,7 +503,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://www.technicpack.net/download',
     minRam: '4 GB',
     features: ['Tekkit Classic', 'Hexxit Support', 'Community Modpack Index'],
-    image: '/public/assets/aistudio/image_63fb17d3.png', // Technic Launcher screenshot
+    image: '/assets/aistudio/image_63fb17d3.png', // Technic Launcher screenshot
     brandColor: '#0284c7'
   },
   // 12. LabyMod 4
@@ -543,7 +543,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://labymod.net/download',
     minRam: '3 GB',
     features: ['Voice Chat Built-in', 'Custom HUD Builder', 'Addon Store', 'Fabric & Forge Ready'],
-    image: '/public/assets/aistudio/image_62e21709.png', // LabyMod 4 screenshot
+    image: '/assets/aistudio/image_62e21709.png', // LabyMod 4 screenshot
     brandColor: '#3b82f6'
   },
   // 13. Feather Client
@@ -583,7 +583,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://feathermc.com/download',
     minRam: '3 GB',
     features: ['Built-in Voice Chat', 'Fabric Mod Store', 'Performance Boost', 'Social Party System'],
-    image: '/public/assets/aistudio/image_b76af1ea.png', // Feather Client screenshot
+    image: '/assets/aistudio/image_b76af1ea.png', // Feather Client screenshot
     brandColor: '#6366f1'
   },
 
@@ -628,7 +628,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/Voxelum/x-minecraft-launcher',
     minRam: '2 GB',
     features: ['Ely.by Native Support', 'Offline / Non-License Mode', 'Official Microsoft Auth', 'P2P Multiplayer LAN', 'Modrinth & CurseForge Hub'],
-    image: '/public/assets/aistudio/image_b12679d1.png', // User attachment of XMCL
+    image: '/assets/aistudio/image_b12679d1.png', // User attachment of XMCL
     brandColor: '#06b6d4'
   },
   {
@@ -668,7 +668,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://sklauncher.pl/download',
     minRam: '2 GB',
     features: ['Ely.by Skin Support', 'Offline Mode Ready', 'Discord Rich Presence', 'Clean Minimalist UI'],
-    image: '/public/assets/aistudio/image_fb92bc03.png', // User attachment of SKLauncher
+    image: '/assets/aistudio/image_fb92bc03.png', // User attachment of SKLauncher
     brandColor: '#f59e0b'
   },
   {
@@ -708,7 +708,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/FreeSM-Launcher/FreeSM',
     minRam: '2 GB',
     features: ['Prism Core Engine', 'Free / Offline Auth', 'Ely.by Integration', 'Multi-Instance', 'Modpack Hub'],
-    image: '/public/assets/aistudio/image_1953a099.png', // User attachment of FreeSM Launcher
+    image: '/assets/aistudio/image_1953a099.png', // User attachment of FreeSM Launcher
     brandColor: '#a855f7'
   },
   {
@@ -748,7 +748,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/pinecone-mc/launcher',
     minRam: '1.5 GB',
     features: ['Instant Startup', 'Ely.by Skin Sync', 'Offline Play', 'Ultra Lightweight'],
-    image: '/public/assets/aistudio/image_4aa8b394.png', // User attachment of Pinecone MC
+    image: '/assets/aistudio/image_4aa8b394.png', // User attachment of Pinecone MC
     brandColor: '#10b981'
   },
   {
@@ -789,7 +789,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/Legacy-Launcher/LegacyLauncher',
     minRam: '1.5 GB',
     features: ['Original TL Codebase', 'Full Ely.by Integration', 'OptiFine Quick-Install', 'Safe & Audited'],
-    image: '/public/assets/aistudio/image_d0c736b6.png', // User attachment of Legacy Launcher (Turikhay)
+    image: '/assets/aistudio/image_d0c736b6.png', // User attachment of Legacy Launcher (Turikhay)
     brandColor: '#2563eb'
   },
   {
@@ -830,7 +830,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/PojavLauncherTeam/PojavLauncher',
     minRam: '3 GB (Mobile)',
     features: ['Java Edition on Smartphone', 'Custom Touch Controls', 'Modding on Mobile', 'Ely.by & Offline Support'],
-    image: '/public/assets/aistudio/image_3959cfdd.png', // User attachment of PojavLauncher
+    image: '/assets/aistudio/image_3959cfdd.png', // User attachment of PojavLauncher
     brandColor: '#8b5cf6'
   },
   {
@@ -869,7 +869,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/HMCL-dev/HMCL',
     minRam: '2 GB',
     features: ['Ultra-fast Mirror Download', 'Ely.by Support', 'Multi-Instance', 'Modpack Export'],
-    image: '/public/assets/aistudio/image_9a3015cb.png', // User attachment of HMCL
+    image: '/assets/aistudio/image_9a3015cb.png', // User attachment of HMCL
     brandColor: '#3b82f6'
   },
   {
@@ -908,7 +908,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/fn2006/PollyMC',
     minRam: '2 GB',
     features: ['Prism Engine', 'Offline Mode Built-in', 'Ely.by Integration', 'Multi-Instance'],
-    image: '/public/assets/aistudio/image_4b042a05.png',
+    image: '/assets/aistudio/image_4b042a05.png',
     brandColor: '#ec4899'
   },
   {
@@ -947,7 +947,7 @@ export const LAUNCHERS: LauncherItem[] = [
     githubUrl: 'https://github.com/UltiMC/Launcher',
     minRam: '1 GB',
     features: ['Ultra-light RAM usage', 'Multi-Instance', 'Offline Auth'],
-    image: '/src/assets/images/prism_launcher_mockup_1794042691402.jpg',
+    image: '/assets/images/prism_launcher_mockup_1794042691402.jpg',
     brandColor: '#64748b'
   },
   {
@@ -986,7 +986,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://www.bakaxl.com',
     minRam: '2 GB',
     features: ['Anime Theming', 'Sound Effects', 'Modrinth Support'],
-    image: '/public/assets/aistudio/image_4670cc54.png', // User attachment of BakaXL
+    image: '/assets/aistudio/image_4670cc54.png', // User attachment of BakaXL
     brandColor: '#f43f5e'
   },
 
@@ -1031,7 +1031,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://salwyrr.com',
     minRam: '2 GB',
     features: ['Closed Source Binary', 'Unverified Telemetry', 'Anticheat Banned', 'Use Lunar/Prism Instead'],
-    image: '/public/assets/aistudio/image_ae86e5ed.png', // User attachment of Salwyrr
+    image: '/assets/aistudio/image_ae86e5ed.png', // User attachment of Salwyrr
     brandColor: '#dc2626',
     wikiInvestigation: {
       title: 'Investigasi Keamanan Salwyrr Client: Mengapa Masuk Kategori Tidak Aman?',
@@ -1110,7 +1110,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://tlauncher.org',
     minRam: '4 GB (Banyak Background Process)',
     features: ['Fake Skin System', 'Unchecked Remote Payloads', 'Adware Injection', 'Hosts File Tampering'],
-    image: '/src/assets/images/mc_security_warning_1794042692098.jpg',
+    image: '/assets/images/mc_security_warning_1794042692098.jpg',
     brandColor: '#dc2626',
     wikiInvestigation: {
       title: 'Skandal TLauncher & Analisis Ancaman Keamanan Cyber',
@@ -1216,7 +1216,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://prismlauncher.org',
     minRam: '2 GB',
     features: ['Compromised Project', 'Abandoned by Core Team', 'Use Prism Instead'],
-    image: '/public/assets/aistudio/image_9786a7b8.png', // User attachment of PolyMC
+    image: '/assets/aistudio/image_9786a7b8.png', // User attachment of PolyMC
     brandColor: '#ef4444',
     wikiInvestigation: {
       title: 'Krisis Keamanan PolyMC & Migrasi Massal ke Prism Launcher',
@@ -1289,7 +1289,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: '#',
     minRam: '2 GB',
     features: ['Outdated Client', 'No Updates', 'Unsafe Download Mirrors'],
-    image: '/src/assets/images/mc_security_warning_1794042692098.jpg',
+    image: '/assets/images/mc_security_warning_1794042692098.jpg',
     brandColor: '#b91c1c',
     wikiInvestigation: {
       title: 'Titan Launcher: Bahaya Mengunduh Software Bajakan yang Ditelantarkan',
@@ -1358,7 +1358,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: '#',
     minRam: '2 GB',
     features: ['Discontinued Legacy', 'Phishing Site Magnet', 'No Modern Support'],
-    image: '/src/assets/images/mc_security_warning_1794042692098.jpg',
+    image: '/assets/images/mc_security_warning_1794042692098.jpg',
     brandColor: '#991b1b',
     wikiInvestigation: {
       title: 'Waspada Penipuan Situs Shiginima Launcher Palsu',
@@ -1425,7 +1425,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: '#',
     minRam: '4 GB',
     features: ['Active Malware', 'Do Not Install', 'Blacklisted'],
-    image: '/src/assets/images/mc_security_warning_1794042692098.jpg',
+    image: '/assets/images/mc_security_warning_1794042692098.jpg',
     brandColor: '#7f1d1d',
     wikiInvestigation: {
       title: 'Peringatan Ancaman TeuLauncher: Modifikasi Trojan Berbahaya',

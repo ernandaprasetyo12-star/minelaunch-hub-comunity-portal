@@ -5,6 +5,8 @@ import {
   XCircle, AlertTriangle, FileText, ShieldCheck, Sparkles, Globe 
 } from 'lucide-react';
 
+import { SafeImage } from './SafeImage';
+
 interface LauncherCardProps {
   launcher: LauncherItem;
   onOpenDetails: (launcher: LauncherItem) => void;
@@ -33,11 +35,10 @@ export const LauncherCard: React.FC<LauncherCardProps> = ({
     >
       {/* Visual Header / Brand Artwork */}
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-neutral-950">
-        <img
+        <SafeImage
           src={launcher.image}
           alt={`Brand visual dan screenshot untuk ${launcher.name}`}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          referrerPolicy="no-referrer"
         />
 
         {/* Scrim Overlay */}

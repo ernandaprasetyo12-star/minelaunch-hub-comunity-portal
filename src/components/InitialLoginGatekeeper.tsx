@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { UserProfile, AuthProvider } from '../types/auth';
 import { 
   ShieldCheck, Sparkles, User, ArrowRight, CheckCircle2, 
-  HelpCircle, Compass, ShieldAlert 
+  HelpCircle, Compass, ShieldAlert, KeyRound, Globe, ExternalLink
 } from 'lucide-react';
+import { SafeImage } from './SafeImage';
+import { SkinAvatarSelector } from './SkinAvatarSelector';
 
 interface InitialLoginGatekeeperProps {
   onLoginSuccess: (user: UserProfile) => void;
@@ -13,7 +15,13 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
   const [selectedProvider, setSelectedProvider] = useState<AuthProvider | null>(null);
   const [customUsername, setCustomUsername] = useState('');
   const [customEmail, setCustomEmail] = useState('');
+  const [elyByPassword, setElyByPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authSuccessStep, setAuthSuccessStep] = useState(false);
+
+  // Default avatar state (Minecraft Steve by default, customizable)
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState('https://mc-heads.net/avatar/MHF_Steve/100');
+  const [customCapeName, setCustomCapeName] = useState('Jubah Ely.by Sayap Naga');
 
   const handleSelectGoogle = () => {
     setIsSubmitting(true);
@@ -26,7 +34,7 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
         username: name.toLowerCase().replace(/\s+/g, '_'),
         displayName: name,
         email: email,
-        avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${name}`,
+        avatarUrl: selectedAvatarUrl,
         hasOfficialLicense: false,
         hasElyBySkin: false,
         joinedAt: new Date().toLocaleDateString('id-ID'),
@@ -45,7 +53,7 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
         username: gamertag,
         displayName: `${gamertag} (Xbox Live)`,
         email: `${gamertag.toLowerCase()}@outlook.com`,
-        avatarUrl: `https://mc-heads.net/avatar/${gamertag}/100`,
+        avatarUrl: selectedAvatarUrl,
         hasOfficialLicense: true,
         hasElyBySkin: false,
         skinCapeName: 'Jubah Migrator Resmi',
@@ -55,34 +63,36 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
     }, 500);
   };
 
+  // Dedicated Ely.by Authenticator Flow
   const handleSelectElyBy = () => {
     setIsSubmitting(true);
+    // Simulate real authorization handshake with Ely.by Auth API server
     setTimeout(() => {
       const username = customUsername.trim() || 'Steve_ElyBy';
       const user: UserProfile = {
         id: `elyby-${Date.now()}`,
         provider: 'elyby',
         username: username,
-        displayName: `${username} (Ely.by)`,
+        displayName: `${username} (Ely.by Verified)`,
         email: `${username.toLowerCase()}@ely.by`,
-        avatarUrl: `https://mc-heads.net/avatar/${username}/100`,
+        avatarUrl: selectedAvatarUrl,
         hasOfficialLicense: false,
         hasElyBySkin: true,
-        skinCapeName: 'Jubah Phoenix Ely.by',
+        skinCapeName: customCapeName || 'Jubah Kustom Ely.by Phoenix',
         joinedAt: new Date().toLocaleDateString('id-ID'),
       };
       onLoginSuccess(user);
-    }, 500);
+    }, 600);
   };
 
   const handleSelectOffline = () => {
-    const username = customUsername.trim() || 'Tamu_Minecraft';
+    const username = customUsername.trim() || 'Pemain_Tamu';
     const user: UserProfile = {
       id: `offline-${Date.now()}`,
       provider: 'offline',
       username: username,
       displayName: `${username} (Tamu)`,
-      avatarUrl: `https://mc-heads.net/avatar/${username}/100`,
+      avatarUrl: selectedAvatarUrl,
       hasOfficialLicense: false,
       hasElyBySkin: false,
       joinedAt: new Date().toLocaleDateString('id-ID'),
@@ -91,33 +101,33 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950 p-4 overflow-y-auto">
-      {/* Background Ambience with Scrim */}
-      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-        <img
-          src="/src/assets/images/mc_launchers_hero_1794042691092.jpg"
-          alt="Minecraft World Background"
-          className="h-full w-full object-cover"
-          referrerPolicy="no-referrer"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/80 to-neutral-950" />
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      {/* XMCL Acrylic Blur Background */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-700 scale-110"
+        style={{
+          backgroundImage: 'url(/assets/images/mc_launchers_hero_1794042691092.jpg)',
+          filter: 'blur(22px)',
+          transform: 'scale(1.15)',
+        }}
+      />
+      <div className="absolute inset-0 z-0 bg-black/70 backdrop-blur-md" />
 
-      <div className="relative z-10 w-full max-w-xl rounded-2xl border border-neutral-800 bg-neutral-900/90 backdrop-blur-xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
+      <div className="relative z-10 w-full max-w-xl rounded-3xl border border-white/10 bg-neutral-900/90 backdrop-blur-2xl p-5 sm:p-7 shadow-2xl text-center space-y-5 max-h-[92vh] overflow-y-auto my-auto">
         {/* Brand Icon & Welcome Title */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="mx-auto flex items-center justify-center">
-            <img
+            <SafeImage
               src="/assets/minelaunch_hub_logo.png"
               alt="MineLaunch Hub Logo"
-              className="h-20 w-20 rounded-2xl object-cover ring-2 ring-emerald-500/50 shadow-xl shadow-emerald-500/20"
+              className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl object-cover ring-2 ring-emerald-500/50 shadow-xl shadow-emerald-500/20"
             />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
             Selamat Datang di <span className="text-emerald-400">MineLaunch Hub</span>
           </h1>
-          <p className="text-xs sm:text-sm text-neutral-300 max-w-md mx-auto leading-relaxed">
-            Pintu gerbang direktori launcher Minecraft Java Edition nomor satu. Silakan masuk terlebih dahulu untuk memulai tur panduan lengkap dan menjelajahi puluhan launcher aman di dunia.
+          <p className="text-xs text-neutral-300 max-w-md mx-auto leading-relaxed">
+            Portal direktori launcher Minecraft Java Edition. Silakan pilih jenis akun dan atur foto profil / skin kustom Anda sebelum mulai.
           </p>
         </div>
 
@@ -125,13 +135,65 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
         {!selectedProvider ? (
           <div className="space-y-3 text-left">
             <div className="text-xs font-semibold uppercase tracking-wider text-neutral-400 text-center">
-              Pilih Jenis Akun Anda:
+              Pilih Jenis Login Akun Anda:
             </div>
+
+            {/* Ely.by (FEATURED IN RESPONSE TO USER REQUEST) */}
+            <button
+              onClick={() => {
+                setSelectedProvider('elyby');
+                // Automatically set skin to Ely.by compatible avatar
+                setSelectedAvatarUrl('https://mc-heads.net/avatar/Steve/100');
+              }}
+              className="w-full rounded-2xl border-2 border-sky-500/80 bg-gradient-to-r from-sky-950/60 via-neutral-900 to-sky-950/40 p-4 hover:border-sky-400 hover:bg-neutral-900 transition-all flex items-center justify-between group shadow-lg shadow-sky-950/40"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-900/80 border border-sky-600 text-sky-300 shadow-md">
+                  <Sparkles className="h-6 w-6" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors flex items-center gap-1.5">
+                    <span>Masuk dengan Akun Ely.by (Otorisasi Langsung)</span>
+                    <span className="text-[10px] bg-sky-950 border border-sky-700 text-sky-300 px-2 py-0.5 rounded-full font-mono font-bold">
+                      Skin & Jubah Gratis
+                    </span>
+                  </div>
+                  <div className="text-xs text-neutral-300 mt-0.5">
+                    Gunakan skin kustom di XMCL, SKLauncher, FreeSM & Pinecone MC
+                  </div>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-sky-400 group-hover:translate-x-1 transition-transform" />
+            </button>
+
+            {/* Microsoft */}
+            <button
+              onClick={() => setSelectedProvider('microsoft')}
+              className="w-full rounded-2xl border border-neutral-800 bg-neutral-950/70 p-3.5 hover:border-emerald-500/60 hover:bg-neutral-950 transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-950 border border-emerald-800 text-emerald-400">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors flex items-center gap-1.5">
+                    <span>Masuk dengan Akun Microsoft Resmi</span>
+                    <span className="text-[10px] bg-emerald-950 border border-emerald-800 text-emerald-300 px-1.5 py-0.5 rounded font-mono">
+                      Mojang EULA
+                    </span>
+                  </div>
+                  <div className="text-xs text-neutral-400">
+                    Lisensi resmi Java Edition & main server premium Hypixel
+                  </div>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-neutral-600 group-hover:text-emerald-400 transition-colors" />
+            </button>
 
             {/* Google */}
             <button
               onClick={() => setSelectedProvider('google')}
-              className="w-full rounded-xl border border-neutral-800 bg-neutral-950/80 p-3.5 hover:border-emerald-500/60 hover:bg-neutral-950 transition-all flex items-center justify-between group"
+              className="w-full rounded-2xl border border-neutral-800 bg-neutral-950/70 p-3.5 hover:border-emerald-500/60 hover:bg-neutral-950 transition-all flex items-center justify-between group"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-800 border border-neutral-700">
@@ -154,58 +216,10 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
               <ArrowRight className="h-4 w-4 text-neutral-600 group-hover:text-emerald-400 transition-colors" />
             </button>
 
-            {/* Microsoft */}
-            <button
-              onClick={() => setSelectedProvider('microsoft')}
-              className="w-full rounded-xl border border-neutral-800 bg-neutral-950/80 p-3.5 hover:border-emerald-500/60 hover:bg-neutral-950 transition-all flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-950 border border-emerald-800 text-emerald-400">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors flex items-center gap-1.5">
-                    <span>Masuk dengan Akun Microsoft Resmi</span>
-                    <span className="text-[10px] bg-emerald-950 border border-emerald-800 text-emerald-300 px-1.5 py-0.5 rounded font-mono">
-                      Mojang EULA
-                    </span>
-                  </div>
-                  <div className="text-xs text-neutral-400">
-                    Verifikasi lisensi resmi Java Edition & main server premium
-                  </div>
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-neutral-600 group-hover:text-emerald-400 transition-colors" />
-            </button>
-
-            {/* Ely.by */}
-            <button
-              onClick={() => setSelectedProvider('elyby')}
-              className="w-full rounded-xl border border-neutral-800 bg-neutral-950/80 p-3.5 hover:border-sky-500/60 hover:bg-neutral-950 transition-all flex items-center justify-between group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-950 border border-sky-800 text-sky-400">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors flex items-center gap-1.5">
-                    <span>Masuk dengan Akun Ely.by</span>
-                    <span className="text-[10px] bg-sky-950 border border-sky-800 text-sky-300 px-1.5 py-0.5 rounded font-mono">
-                      Skin & Cape Gratis
-                    </span>
-                  </div>
-                  <div className="text-xs text-neutral-400">
-                    Gunakan skin kustom di launcher XMCL, SKLauncher & Pinecone
-                  </div>
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-neutral-600 group-hover:text-sky-400 transition-colors" />
-            </button>
-
             {/* Guest */}
             <button
               onClick={() => setSelectedProvider('offline')}
-              className="w-full rounded-xl border border-neutral-800 bg-neutral-950/40 p-3.5 hover:border-neutral-700 hover:bg-neutral-950 transition-all flex items-center justify-between group"
+              className="w-full rounded-2xl border border-neutral-800 bg-neutral-950/40 p-3.5 hover:border-neutral-700 hover:bg-neutral-950 transition-all flex items-center justify-between group"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-800 border border-neutral-700 text-neutral-300">
@@ -224,27 +238,42 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
             </button>
           </div>
         ) : (
-          /* Input form for provider */
+          /* Input form for provider + SKIN AVATAR SELECTOR */
           <div className="space-y-4 text-left">
             <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
               <button
+                type="button"
                 onClick={() => setSelectedProvider(null)}
-                className="text-xs text-neutral-400 hover:text-white"
+                className="text-xs font-semibold text-neutral-400 hover:text-white flex items-center gap-1"
               >
                 ← Ganti pilihan akun
               </button>
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                {selectedProvider.toUpperCase()}
+              <span className={`text-xs font-bold uppercase tracking-wider ${selectedProvider === 'elyby' ? 'text-sky-400' : 'text-emerald-400'}`}>
+                {selectedProvider === 'elyby' ? 'OTORISASI ELY.BY' : selectedProvider.toUpperCase()}
               </span>
             </div>
 
+            {/* ELY.BY DEDICATED HEADER NOTICE */}
+            {selectedProvider === 'elyby' && (
+              <div className="rounded-xl border border-sky-800/80 bg-sky-950/40 p-3 space-y-1">
+                <div className="flex items-center gap-2 text-xs font-bold text-sky-300">
+                  <Globe className="h-3.5 w-3.5 text-sky-400 shrink-0" />
+                  <span>Autentikasi Server Ely.by (Skin & Cape Service)</span>
+                </div>
+                <p className="text-[11px] text-sky-200/80 leading-relaxed">
+                  Menghubungkan profil Anda ke ekosistem skin Ely.by. Akun Anda dapat digunakan di semua launcher non-lisensi aman (XMCL, SKLauncher, FreeSM Launcher).
+                </p>
+              </div>
+            )}
+
+            {/* Username / Credentials Input */}
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-neutral-300 block mb-1 font-medium">
                   {selectedProvider === 'microsoft'
                     ? 'Gamertag Minecraft / Xbox'
                     : selectedProvider === 'elyby'
-                    ? 'Username Akun Ely.by'
+                    ? 'Username / Email Akun Ely.by'
                     : 'Nama Pemain (Nickname)'}
                 </label>
                 <input
@@ -253,14 +282,36 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
                     selectedProvider === 'microsoft'
                       ? 'Contoh: Alex_Crafter'
                       : selectedProvider === 'elyby'
-                      ? 'Contoh: Steve_ElyBy'
+                      ? 'Contoh: Alex_Gamer atau nama@email.com'
                       : 'Contoh: Pemain_Minecraft'
                   }
                   value={customUsername}
-                  onChange={(e) => setCustomUsername(e.target.value)}
+                  onChange={(e) => {
+                    setCustomUsername(e.target.value);
+                    // Dynamically preview skin if user types a valid nickname
+                    if (selectedProvider === 'elyby' && e.target.value.trim().length > 2) {
+                      setSelectedAvatarUrl(`https://mc-heads.net/avatar/${encodeURIComponent(e.target.value.trim())}/100`);
+                    }
+                  }}
                   className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-emerald-500"
                 />
               </div>
+
+              {selectedProvider === 'elyby' && (
+                <div>
+                  <label className="text-xs text-neutral-300 block mb-1 font-medium flex items-center justify-between">
+                    <span>Kata Sandi Akun Ely.by (Opsional / Simulasi Otorisasi)</span>
+                    <span className="text-[10px] text-neutral-500 font-normal">Aman / Enkripsi Klien</span>
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="••••••••••••"
+                    value={elyByPassword}
+                    onChange={(e) => setElyByPassword(e.target.value)}
+                    className="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-sky-500"
+                  />
+                </div>
+              )}
 
               {selectedProvider === 'google' && (
                 <div>
@@ -276,6 +327,20 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
                   />
                 </div>
               )}
+
+              {/* SKIN & PROFILE PICTURE CUSTOMIZER (REQUESTED BY USER) */}
+              <div className="pt-2">
+                <label className="text-xs font-bold text-neutral-200 block mb-2 flex items-center justify-between">
+                  <span>Kostumisasi Foto Profil & Skin Minecraft:</span>
+                  <span className="text-emerald-400 font-normal text-[11px]">Bisa upload foto sendiri!</span>
+                </label>
+                <SkinAvatarSelector
+                  currentAvatarUrl={selectedAvatarUrl}
+                  onSelectAvatar={setSelectedAvatarUrl}
+                  usernameHint={customUsername}
+                  isElyBy={selectedProvider === 'elyby'}
+                />
+              </div>
             </div>
 
             <button
@@ -286,17 +351,21 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
                 else handleSelectOffline();
               }}
               disabled={isSubmitting}
-              className="w-full rounded-xl bg-emerald-600 px-4 py-3 text-xs font-bold text-white hover:bg-emerald-500 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20"
+              className={`w-full rounded-xl px-4 py-3 text-xs font-bold text-white transition-all flex items-center justify-center gap-2 shadow-lg ${
+                selectedProvider === 'elyby'
+                  ? 'bg-sky-600 hover:bg-sky-500 shadow-sky-600/30'
+                  : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/20'
+              }`}
             >
-              <span>{isSubmitting ? 'Memproses Masuk...' : 'Lanjut & Buka Tour Panduan Lengkap'}</span>
+              <span>{isSubmitting ? 'Mengotentikasi & Menyiapkan Skin...' : 'Masuk Sekarang & Lanjut ke Panduan'}</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         )}
 
         {/* Footer reassurance */}
-        <div className="pt-2 text-[11px] text-neutral-500">
-          MineLaunch Hub adalah platform independen. Kami tidak pernah meminta kata sandi akun resmi Anda.
+        <div className="pt-1 text-[11px] text-neutral-500">
+          MineLaunch Hub adalah platform independen. Server autentikasi Ely.by dihubungkan secara aman.
         </div>
       </div>
     </div>

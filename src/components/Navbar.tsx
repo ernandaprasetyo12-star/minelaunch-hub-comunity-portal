@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Compass, User, LogOut, Sparkles, ShieldCheck, BookOpen, Layers, CheckSquare, BarChart3, Menu, X } from 'lucide-react';
+import { 
+  ShieldAlert, Compass, User, LogOut, Sparkles, ShieldCheck, 
+  BookOpen, Layers, CheckSquare, BarChart3, Menu, X, Settings 
+} from 'lucide-react';
 import { UserProfile } from '../types/auth';
+import { SafeImage } from './SafeImage';
 
 export type AppViewMode = 'home' | 'catalog' | 'licensed' | 'non-licensed' | 'dangerous' | 'about' | 'comparison';
 
@@ -10,6 +14,7 @@ interface NavbarProps {
   onOpenSafetyGuide: () => void;
   onOpenTour: () => void;
   onOpenLogin: () => void;
+  onOpenSettings: () => void;
   user: UserProfile | null;
   onLogout: () => void;
 }
@@ -20,6 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSafetyGuide,
   onOpenTour,
   onOpenLogin,
+  onOpenSettings,
   user,
   onLogout,
 }) => {
@@ -196,8 +202,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           <button
+            onClick={onOpenSettings}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-900/90 px-2.5 py-1.5 text-xs font-semibold text-neutral-200 hover:border-emerald-500 hover:text-emerald-400 transition-colors whitespace-nowrap shrink-0"
+            title="Buka Pengaturan Tampilan & Blur XMCL"
+          >
+            <Settings className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="hidden sm:inline">Pengaturan</span>
+          </button>
+
+          <button
             onClick={onOpenSafetyGuide}
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-red-900/80 bg-red-950/60 px-2.5 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-900/40 hover:text-white transition-colors whitespace-nowrap shrink-0"
+            className="hidden md:inline-flex items-center gap-1.5 rounded-lg border border-red-900/80 bg-red-950/60 px-2.5 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-900/40 hover:text-white transition-colors whitespace-nowrap shrink-0"
           >
             <ShieldAlert className="h-3.5 w-3.5 text-red-400" />
             <span>Cek Keamanan</span>
@@ -274,6 +289,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <BookOpen className="h-4 w-4 text-emerald-400" />
             <span>Tentang Minecraft & Lisensi</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              onOpenSettings();
+            }}
+            className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 text-emerald-400 hover:bg-neutral-900 border border-emerald-900/50"
+          >
+            <Settings className="h-4 w-4" />
+            <span>Pengaturan Tampilan & Blur XMCL</span>
           </button>
 
           <button
