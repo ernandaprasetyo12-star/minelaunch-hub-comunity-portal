@@ -1,5 +1,6 @@
 export interface AppSettings {
   // Theme and Background
+  themeMode: 'system' | 'dark' | 'light';
   backgroundWallpaper: string; // URL or preset id
   backgroundBlur: number; // in pixels (e.g. 16px)
   backgroundDim: number; // in percentage (0 - 100)
@@ -55,6 +56,7 @@ export const WALLPAPER_PRESETS = [
 ];
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
+  themeMode: 'system',
   backgroundWallpaper: '/assets/images/mc_launchers_hero_1794042691092.jpg',
   backgroundBlur: 20, // 20px blur by default like XMCL acrylic
   backgroundDim: 65,  // 65% dark overlay

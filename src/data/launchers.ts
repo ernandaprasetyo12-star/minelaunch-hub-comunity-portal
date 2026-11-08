@@ -1110,7 +1110,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: 'https://tlauncher.org',
     minRam: '4 GB (Banyak Background Process)',
     features: ['Fake Skin System', 'Unchecked Remote Payloads', 'Adware Injection', 'Hosts File Tampering'],
-    image: '/assets/images/mc_security_warning_1794042692098.jpg',
+    image: '/assets/aistudio/image_43886a83.png',
     brandColor: '#dc2626',
     wikiInvestigation: {
       title: 'Skandal TLauncher & Analisis Ancaman Keamanan Cyber',
@@ -1289,7 +1289,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: '#',
     minRam: '2 GB',
     features: ['Outdated Client', 'No Updates', 'Unsafe Download Mirrors'],
-    image: '/assets/images/mc_security_warning_1794042692098.jpg',
+    image: '/assets/aistudio/image_a75bffff.png',
     brandColor: '#b91c1c',
     wikiInvestigation: {
       title: 'Titan Launcher: Bahaya Mengunduh Software Bajakan yang Ditelantarkan',
@@ -1358,7 +1358,7 @@ export const LAUNCHERS: LauncherItem[] = [
     downloadUrl: '#',
     minRam: '2 GB',
     features: ['Discontinued Legacy', 'Phishing Site Magnet', 'No Modern Support'],
-    image: '/assets/images/mc_security_warning_1794042692098.jpg',
+    image: '/assets/aistudio/image_3cd8a1c7.png',
     brandColor: '#991b1b',
     wikiInvestigation: {
       title: 'Waspada Penipuan Situs Shiginima Launcher Palsu',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Palette, 
@@ -14,9 +14,15 @@ import {
   Layers,
   Upload,
   SunMedium,
-  CheckCircle2
+  CheckCircle2,
+  User,
+  Save,
+  Shield
 } from 'lucide-react';
 import { AppSettings, WALLPAPER_PRESETS } from '../types/settings';
+import { UserProfile } from '../types/auth';
+import { SkinAvatarSelector } from './SkinAvatarSelector';
+import { SafeImage } from './SafeImage';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -24,6 +30,9 @@ interface SettingsModalProps {
   settings: AppSettings;
   onUpdateSettings: (newSettings: Partial<AppSettings>) => void;
   onResetSettings: () => void;
+  user?: UserProfile | null;
+  onUpdateUser?: (updatedUser: UserProfile) => void;
+  defaultTab?: 'appearance' | 'profile' | 'android' | 'security';
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -32,10 +41,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   settings,
   onUpdateSettings,
   onResetSettings,
+  user,
+  onUpdateUser,
+  defaultTab = 'appearance',
 }) => {
-  const [activeTab, setActiveTab] = useState<'appearance' | 'android' | 'security'>('appearance');
+  const [activeTab, setActiveTab] = useState<'appearance' | 'profile' | 'android' | 'security'>(defaultTab);
   const [customInputUrl, setCustomInputUrl] = useState(settings.customBackgroundUrl || '');
   const [customSaved, setCustomSaved] = useState(false);
+
+  // Editable Profile States
+  const [profileDisplayName, setProfileDisplayName] = useState(user?.displayName || '');
+  const [profileUsername, setProfileUsername] = useState(user?.username || '');
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState(user?.avatarUrl || 'https://mc-heads.net/avatar/Steve/100');
+  const [profileHasOfficial, setProfileHasOfficial] = useState(user?.hasOfficialLicense ?? true);
+  const [profileHasElyBy, setProfileHasElyBy] = useState(user?.hasElyBySkin ?? true);
+  const [profileSaved, setProfileSaved] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setProfileDisplayName(user.displayName);
+      setProfileUsername(user.username);
+      setProfileAvatarUrl(user.avatarUrl);
+      setProfileHasOfficial(user.hasOfficialLicense);
+      setProfileHasElyBy(user.hasElyBySkin);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (isOpen && defaultTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [isOpen, defaultTab]);
 
   if (!isOpen) return null;
 
@@ -99,6 +135,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('profile')}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all shrink-0 ${
+              activeTab === 'profile'
+                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950'
+                : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+            }`}
+          >
+            <User className="h-4 w-4" />
+            <span>Profil Akun Saya</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('android')}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all shrink-0 ${
               activeTab === 'android'
@@ -128,6 +176,42 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* TAB 1: APPEARANCE & BLUR BACKGROUND (XMCL ACRYLIC) */}
           {activeTab === 'appearance' && (
             <div className="space-y-6">
+              {/* Theme Mode Selector (Ikuti Sistem, Gelap, Terang) */}
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4.5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <SunMedium className="h-4 w-4 text-emerald-400" />
+                    <span className="text-sm font-bold text-white">Tema Warna Aplikasi</span>
+                  </div>
+                  <span className="text-xs text-neutral-400 font-mono">
+                    {settings.themeMode === 'system' ? 'Ikuti Sistem' : settings.themeMode === 'dark' ? 'Gelap' : 'Terang'}
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-400">
+                  Pilih tema tampilan yang Anda sukai atau ikuti preferensi otomatis dari sistem perangkat Anda.
+                </p>
+                <div className="grid grid-cols-3 gap-2.5 text-xs">
+                  {[
+                    { id: 'system', label: 'Ikuti Sistem', desc: 'Sesuai Pengaturan OS' },
+                    { id: 'dark', label: 'Tema Gelap', desc: 'Dark Studio (Minecraft)' },
+                    { id: 'light', label: 'Tema Terang', desc: 'Daylight Mode' },
+                  ].map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => onUpdateSettings({ themeMode: theme.id as any })}
+                      className={`p-3 rounded-2xl border text-left transition-all ${
+                        settings.themeMode === theme.id
+                          ? 'border-emerald-500 bg-emerald-950/40 text-emerald-300 ring-2 ring-emerald-500/30 font-bold'
+                          : 'border-neutral-800 bg-neutral-950/60 text-neutral-400 hover:border-neutral-700 hover:text-white'
+                      }`}
+                    >
+                      <div className="text-xs font-bold">{theme.label}</div>
+                      <div className="text-[10px] text-neutral-400 mt-0.5">{theme.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Blur Slider */}
               <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4.5 space-y-3">
                 <div className="flex items-center justify-between">
@@ -277,6 +361,183 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onChange={(e) => onUpdateSettings({ enableVoxelParticles: e.target.checked })}
                   className="h-5 w-5 accent-emerald-500 rounded cursor-pointer"
                 />
+              </div>
+            </div>
+          )}
+
+          {/* TAB: USER PROFILE SETTINGS */}
+          {activeTab === 'profile' && (
+            <div className="space-y-6">
+              {/* Profile Card Header */}
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-14 w-14 rounded-2xl overflow-hidden border-2 border-emerald-500 bg-neutral-900 shadow-lg shrink-0">
+                      <SafeImage
+                        src={profileAvatarUrl || 'https://mc-heads.net/avatar/Steve/100'}
+                        alt={profileDisplayName || 'User Avatar'}
+                        className="h-full w-full object-contain p-0.5"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-white flex items-center gap-2">
+                        <span>{profileDisplayName || user?.displayName || 'Pemain Minecraft'}</span>
+                        {profileHasOfficial && (
+                          <span title="Lisensi Resmi Mojang">
+                            <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
+                          </span>
+                        )}
+                        {profileHasElyBy && (
+                          <span title="Ely.by Skin Active">
+                            <Sparkles className="h-4 w-4 text-sky-400 shrink-0" />
+                          </span>
+                        )}
+                      </h3>
+                      <p className="text-xs text-neutral-400 font-mono">
+                        @{profileUsername || user?.username || 'player_mine'} · {user?.provider || 'Guest Session'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {profileSaved && (
+                    <div className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-3 py-1.5 rounded-xl animate-in fade-in">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>Profil Tersimpan!</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Form Fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-neutral-800/80">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-neutral-300">
+                      Nama Tampilan (Display Name):
+                    </label>
+                    <input
+                      type="text"
+                      value={profileDisplayName}
+                      onChange={(e) => setProfileDisplayName(e.target.value)}
+                      placeholder="Masukkan nama tampilan anda"
+                      className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-neutral-300">
+                      Username / Gamertag Minecraft:
+                    </label>
+                    <input
+                      type="text"
+                      value={profileUsername}
+                      onChange={(e) => setProfileUsername(e.target.value)}
+                      placeholder="Contoh: Steve_Gamer123"
+                      className="w-full rounded-xl border border-neutral-800 bg-neutral-900 px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:border-emerald-500 focus:outline-none font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Skin & Avatar Selector Component */}
+                <div className="pt-2">
+                  <SkinAvatarSelector
+                    currentAvatarUrl={profileAvatarUrl}
+                    onSelectAvatar={(url) => setProfileAvatarUrl(url)}
+                    usernameHint={profileUsername}
+                    isElyBy={profileHasElyBy}
+                  />
+                </div>
+
+                {/* Account Type Badges & Status */}
+                <div className="space-y-3 pt-2 border-t border-neutral-800/80">
+                  <label className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+                    Status Lisensi & Fitur Skin:
+                  </label>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div 
+                      onClick={() => setProfileHasOfficial(!profileHasOfficial)}
+                      className={`cursor-pointer rounded-2xl border p-3.5 transition-all flex items-center justify-between ${
+                        profileHasOfficial 
+                          ? 'border-emerald-500/80 bg-emerald-950/40 text-emerald-300' 
+                          : 'border-neutral-800 bg-neutral-900/40 text-neutral-400 hover:border-neutral-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <ShieldCheck className={`h-5 w-5 ${profileHasOfficial ? 'text-emerald-400' : 'text-neutral-500'}`} />
+                        <div>
+                          <div className="text-xs font-bold">Lisensi Resmi Mojang</div>
+                          <div className="text-[10px] text-neutral-400">Minecraft Java / Bedrock Microsoft</div>
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={profileHasOfficial}
+                        onChange={(e) => setProfileHasOfficial(e.target.checked)}
+                        className="h-4 w-4 accent-emerald-500 rounded cursor-pointer"
+                      />
+                    </div>
+
+                    <div 
+                      onClick={() => setProfileHasElyBy(!profileHasElyBy)}
+                      className={`cursor-pointer rounded-2xl border p-3.5 transition-all flex items-center justify-between ${
+                        profileHasElyBy 
+                          ? 'border-sky-500/80 bg-sky-950/40 text-sky-300' 
+                          : 'border-neutral-800 bg-neutral-900/40 text-neutral-400 hover:border-neutral-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Sparkles className={`h-5 w-5 ${profileHasElyBy ? 'text-sky-400' : 'text-neutral-500'}`} />
+                        <div>
+                          <div className="text-xs font-bold">Skin & Jubah Ely.by</div>
+                          <div className="text-[10px] text-neutral-400">Kompatibel Prism & FreeSM Launcher</div>
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={profileHasElyBy}
+                        onChange={(e) => setProfileHasElyBy(e.target.checked)}
+                        className="h-4 w-4 accent-sky-500 rounded cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Save Profile Button */}
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() => {
+                      if (onUpdateUser && user) {
+                        onUpdateUser({
+                          ...user,
+                          displayName: profileDisplayName.trim() || user.displayName,
+                          username: profileUsername.trim() || user.username,
+                          avatarUrl: profileAvatarUrl,
+                          hasOfficialLicense: profileHasOfficial,
+                          hasElyBySkin: profileHasElyBy,
+                        });
+                        setProfileSaved(true);
+                        setTimeout(() => setProfileSaved(false), 2500);
+                      } else if (onUpdateUser) {
+                        onUpdateUser({
+                          id: 'user_' + Date.now(),
+                          displayName: profileDisplayName.trim() || 'Pemain MineLaunch',
+                          username: profileUsername.trim() || 'steve_player',
+                          avatarUrl: profileAvatarUrl,
+                          hasOfficialLicense: profileHasOfficial,
+                          hasElyBySkin: profileHasElyBy,
+                          skinCapeName: 'Ely.by Original',
+                          provider: 'offline',
+                          joinedAt: new Date().toISOString(),
+                        });
+                        setProfileSaved(true);
+                        setTimeout(() => setProfileSaved(false), 2500);
+                      }
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-emerald-500 transition-all shadow-md shadow-emerald-950"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>Simpan Perubahan Profil</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}

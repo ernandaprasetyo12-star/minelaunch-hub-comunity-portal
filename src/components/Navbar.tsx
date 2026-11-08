@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { 
   ShieldAlert, Compass, User, LogOut, Sparkles, ShieldCheck, 
   BookOpen, Layers, CheckSquare, BarChart3, Menu, X, Settings,
-  ArrowLeft
+  ArrowLeft, Server
 } from 'lucide-react';
 import { UserProfile } from '../types/auth';
 import { SafeImage } from './SafeImage';
 
-export type AppViewMode = 'home' | 'catalog' | 'licensed' | 'non-licensed' | 'dangerous' | 'about' | 'comparison';
+export type AppViewMode = 'home' | 'catalog' | 'licensed' | 'non-licensed' | 'dangerous' | 'servers' | 'about' | 'comparison';
 
 interface NavbarProps {
   currentView: AppViewMode;
@@ -15,7 +15,7 @@ interface NavbarProps {
   onOpenSafetyGuide: () => void;
   onOpenTour: () => void;
   onOpenLogin: () => void;
-  onOpenSettings: () => void;
+  onOpenSettings: (tab?: 'appearance' | 'profile' | 'android' | 'security') => void;
   user: UserProfile | null;
   onLogout: () => void;
 }
@@ -126,6 +126,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           <button
+            onClick={() => handleNavigate('servers')}
+            className={`flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 py-1 ${
+              currentView === 'servers'
+                ? 'text-emerald-400 underline underline-offset-4 decoration-emerald-500 font-bold'
+                : 'text-amber-300 hover:text-amber-200 font-bold'
+            }`}
+          >
+            <Server className="h-3.5 w-3.5 text-emerald-400" />
+            <span>Server Indo 🇮🇩</span>
+          </button>
+
+          <button
             onClick={() => handleNavigate('dangerous')}
             className={`flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 py-1 ${
               currentView === 'dangerous'
@@ -173,11 +185,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Zone 3: 1 Primary Action (User profile or Login button) + Mobile Menu Toggle */}
         <div className="flex items-center gap-2.5 shrink-0">
           {user ? (
-            <div className="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900/90 px-2.5 py-1.5">
+            <div 
+              onClick={() => onOpenSettings('profile')}
+              className="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900/90 px-2.5 py-1.5 cursor-pointer hover:border-emerald-500/60 transition-all group"
+              title="Edit Profil & Skin Avatar"
+            >
               <img
                 src={user.avatarUrl}
                 alt={user.displayName}
-                className="h-6 w-6 rounded-md bg-neutral-800 object-cover border border-neutral-700"
+                className="h-6 w-6 rounded-md bg-neutral-800 object-contain p-0.5 border border-neutral-700 group-hover:scale-110 transition-transform"
                 referrerPolicy="no-referrer"
               />
               <div className="text-left hidden sm:block">
@@ -199,7 +215,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               </div>
               <button
-                onClick={onLogout}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onLogout();
+                }}
                 title="Keluar Akun"
                 className="p-1 text-neutral-400 hover:text-red-400 transition-colors ml-1"
               >
@@ -217,7 +236,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           <button
-            onClick={onOpenSettings}
+            onClick={() => onOpenSettings('appearance')}
             className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-900/90 px-2.5 py-1.5 text-xs font-semibold text-neutral-200 hover:border-emerald-500 hover:text-emerald-400 transition-colors whitespace-nowrap shrink-0"
             title="Buka Pengaturan Tampilan & Blur XMCL"
           >
@@ -284,6 +303,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <Sparkles className="h-4 w-4 text-sky-400" />
             <span>Launcher Non-Lisensi & Ely.by</span>
+          </button>
+
+          <button
+            onClick={() => handleNavigate('servers')}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 ${
+              currentView === 'servers' ? 'bg-emerald-950 text-emerald-400' : 'text-amber-300 hover:bg-neutral-900'
+            }`}
+          >
+            <Server className="h-4 w-4 text-emerald-400" />
+            <span>Server Minecraft Indonesia 🇮🇩</span>
           </button>
 
           <button

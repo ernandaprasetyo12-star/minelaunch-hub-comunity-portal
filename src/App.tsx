@@ -28,6 +28,7 @@ import { Footer } from './components/Footer';
 import { PotatoLaptopModal } from './components/PotatoLaptopModal';
 import { CraftAiModal } from './components/CraftAiModal';
 import { MineLaunchDownloadModal } from './components/MineLaunchDownloadModal';
+import { ServersPage } from './components/ServersPage';
 import { ShieldCheck, Sparkles, Compass } from 'lucide-react';
 
 export default function App() {
@@ -81,6 +82,7 @@ export default function App() {
   const [downloadLauncher, setDownloadLauncher] = useState<LauncherItem | null>(null);
   const [isSafetyChecklistOpen, setIsSafetyChecklistOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [settingsTab, setSettingsTab] = useState<'appearance' | 'profile' | 'android' | 'security'>('appearance');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isTourModalOpen, setIsTourModalOpen] = useState<boolean>(false);
   const [isPotatoModalOpen, setIsPotatoModalOpen] = useState<boolean>(false);
@@ -95,6 +97,20 @@ export default function App() {
       return null;
     }
   });
+
+  const handleOpenSettings = (tab: 'appearance' | 'profile' | 'android' | 'security' = 'appearance') => {
+    setSettingsTab(tab);
+    setIsSettingsOpen(true);
+  };
+
+  const handleUpdateUser = (updatedUser: UserProfile) => {
+    setCurrentUser(updatedUser);
+    try {
+      localStorage.setItem('minelaunch_user', JSON.stringify(updatedUser));
+    } catch {
+      // ignore
+    }
+  };
 
   const handleNavigate = (view: AppViewMode) => {
     setCurrentView(view);
@@ -200,10 +216,12 @@ export default function App() {
           transform: 'scale(1.1)', // prevents white edges when blurred
         }}
       />
-      {/* Dark Dim Overlay controlled by settings */}
+      {/* Dark Dim Overlay controlled by settings & themeMode */}
       <div 
         className="fixed inset-0 z-0 bg-black transition-opacity duration-300 pointer-events-none"
-        style={{ opacity: settings.backgroundDim / 100 }}
+        style={{ 
+          opacity: settings.themeMode === 'light' ? 0.3 : settings.backgroundDim / 100 
+        }}
       />
 
       {/* Floating subtle voxel particles if enabled */}
@@ -220,7 +238,7 @@ export default function App() {
           onOpenSafetyGuide={() => setIsSafetyChecklistOpen(true)}
           onOpenTour={() => setIsTourModalOpen(true)}
           onOpenLogin={() => setIsLoginModalOpen(true)}
-          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenSettings={(tab) => handleOpenSettings(tab || 'appearance')}
           user={currentUser}
           onLogout={handleLogout}
         />
@@ -233,7 +251,13 @@ export default function App() {
               <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2">
                   <span className="text-neutral-400">Akun Aktif:</span>
-                  <strong className="text-white font-semibold">{currentUser.displayName}</strong>
+                  <button 
+                    onClick={() => handleOpenSettings('profile')}
+                    className="text-white font-semibold hover:text-emerald-400 hover:underline transition-colors flex items-center gap-1"
+                    title="Buka Pengaturan Profil"
+                  >
+                    <span>{currentUser.displayName}</span>
+                  </button>
                   <span className="text-neutral-600">·</span>
                   {currentUser.hasOfficialLicense && (
                     <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
@@ -251,8 +275,15 @@ export default function App() {
 
                 <div className="text-neutral-400 flex items-center gap-2">
                   <button
+                    onClick={() => handleOpenSettings('profile')}
+                    className="text-emerald-400 hover:underline flex items-center gap-1 font-medium"
+                  >
+                    <span>Edit Profil & Skin Avatar</span>
+                  </button>
+                  <span>·</span>
+                  <button
                     onClick={() => setIsTourModalOpen(true)}
-                    className="text-emerald-400 hover:underline flex items-center gap-1"
+                    className="text-neutral-300 hover:text-white flex items-center gap-1"
                   >
                     <Compass className="h-3 w-3" />
                     <span>Panduan Tour</span>
@@ -329,6 +360,14 @@ export default function App() {
             />
           )}
 
+          {/* PAGE 6: DEDICATED SERVER MINECRAFT INDONESIA */}
+          {currentView === 'servers' && (
+            <ServersPage
+              onNavigate={handleNavigate}
+              onOpenTour={() => setIsTourModalOpen(true)}
+            />
+          )}
+
           {/* PAGE 6: TENTANG SEMUA: APA ITU MINECRAFT & SISTEM LISENSI */}
           {currentView === 'about' && (
             <div className="space-y-8 pb-12">
@@ -380,17 +419,20 @@ export default function App() {
       <AndroidSystemBar
         currentView={currentView}
         onNavigate={handleNavigate}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenSettings={() => handleOpenSettings('appearance')}
         settings={settings}
       />
 
-      {/* Settings Modal (Pengaturan Latar Belakang & Blur XMCL) */}
+      {/* Settings Modal (Pengaturan Latar Belakang, Profil & Blur XMCL) */}
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         settings={settings}
         onUpdateSettings={handleUpdateSettings}
         onResetSettings={handleResetSettings}
+        user={currentUser}
+        onUpdateUser={handleUpdateUser}
+        defaultTab={settingsTab}
       />
 
       {/* Wikipedia-Style Investigation Dossier Modal */}

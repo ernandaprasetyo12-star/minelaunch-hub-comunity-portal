@@ -16,11 +16,17 @@ import {
   Info,
   Settings,
   Sliders,
-  Cpu
+  Cpu,
+  Server,
+  Copy,
+  Check,
+  Globe,
+  Wifi
 } from 'lucide-react';
 import { AppViewMode } from './Navbar';
 import { LauncherItem } from '../data/launchers';
 import { SafeImage } from './SafeImage';
+import { INDO_SERVERS, MINECRAFT_MP_URL, ServerItem } from '../data/servers';
 
 interface HomePageProps {
   onNavigate: (view: AppViewMode) => void;
@@ -51,6 +57,26 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenDetail,
   sampleLaunchers
 }) => {
+  const [copiedIp, setCopiedIp] = React.useState<string | null>(null);
+  const [customIps, setCustomIps] = React.useState<Record<string, string>>({});
+
+  const getEffectiveIp = (server: ServerItem) => {
+    return customIps[server.id] !== undefined ? customIps[server.id] : server.ip;
+  };
+
+  const handleCopyIp = (server: ServerItem) => {
+    const ipToCopy = getEffectiveIp(server);
+    navigator.clipboard.writeText(ipToCopy);
+    setCopiedIp(server.id);
+    setTimeout(() => setCopiedIp(null), 2500);
+  };
+
+  const handleIpChange = (serverId: string, newIp: string) => {
+    setCustomIps((prev) => ({
+      ...prev,
+      [serverId]: newIp,
+    }));
+  };
   return (
     <div className="space-y-12 pb-16">
       {/* 1. HERO SECTION WITH MINELAUNCH HUB COMMUNITY BRANDING */}
@@ -472,6 +498,131 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* 3.5. LIST MINECRAFT SERVER JAVA EDITION (INDONESIA) */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="border-t border-neutral-800 pt-8 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">
+              <Server className="h-4 w-4" />
+              <span>SERVER MINECRAFT JAVA INDONESIA 🇮🇩</span>
+            </div>
+            <h2 className="text-2xl font-black text-white tracking-tight">
+              List Minecraft Server Java Edition Indonesia
+            </h2>
+            <p className="text-xs sm:text-sm text-neutral-300 mt-1">
+              Server Minecraft lokal terpopuler: Kaizen Network, MineGens, Alwination, Valoria SMP, dan ZEETEZ LEGENDS.
+            </p>
+          </div>
+          <button
+            onClick={() => onNavigate('servers')}
+            className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-950/80 border border-emerald-800 px-3.5 py-2 rounded-xl transition-all shrink-0"
+          >
+            <span>Lihat Semua Server</span>
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Server Cards Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {INDO_SERVERS.map((server) => (
+            <div
+              key={server.id}
+              className="group relative flex flex-col justify-between rounded-2xl border border-neutral-800 bg-neutral-900/70 hover:border-emerald-500/60 transition-all overflow-hidden shadow-lg hover:shadow-emerald-950/40"
+            >
+              <div className="relative aspect-[16/7] w-full overflow-hidden bg-neutral-950">
+                <SafeImage
+                  src={server.image}
+                  alt={server.name}
+                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
+                <div className="absolute top-2.5 left-2.5 bg-black/80 border border-neutral-700 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                  {server.countryFlag} Host Indonesia
+                </div>
+                <div className="absolute top-2.5 right-2.5 bg-emerald-950/90 border border-emerald-800 text-emerald-300 text-[10px] font-mono font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                  <Wifi className="h-3 w-3 animate-pulse" />
+                  <span>{server.playerCountEst}</span>
+                </div>
+              </div>
+
+              <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">
+                    {server.name}
+                  </h3>
+                  <p className="text-xs text-neutral-400 mt-1 line-clamp-2">
+                    {server.description}
+                  </p>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {server.modes.slice(0, 3).map((mode, i) => (
+                      <span key={i} className="text-[10px] bg-neutral-950 text-neutral-300 border border-neutral-800 px-2 py-0.5 rounded">
+                        {mode}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-neutral-800/80 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={getEffectiveIp(server)}
+                      onChange={(e) => handleIpChange(server.id, e.target.value)}
+                      title="Ubah IP server jika Anda menggunakan domain kustom"
+                      className="flex-1 bg-neutral-950 border border-neutral-800 rounded-lg px-2.5 py-1.5 font-mono text-xs text-emerald-400 font-bold focus:border-emerald-500 focus:outline-none select-all"
+                    />
+                    <button
+                      onClick={() => handleCopyIp(server)}
+                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-500 transition-all shrink-0"
+                    >
+                      {copiedIp === server.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{copiedIp === server.id ? 'Disalin' : 'Salin IP'}</span>
+                    </button>
+                  </div>
+                  <div className="text-[10px] text-neutral-400 font-mono flex items-center justify-between">
+                    <span>Java: 25565 | Bedrock: {server.bedrockPort || 19132}</span>
+                    <span className="text-emerald-400 font-sans font-semibold">✓ IP Resmi</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* MINECRAFT-MP CALLOUT BANNER (Gambar fcffa648.png) */}
+        <div className="rounded-2xl border border-sky-800/80 bg-gradient-to-r from-sky-950/80 via-neutral-900 to-neutral-950 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-xl">
+          <div className="flex flex-col sm:flex-row items-center gap-5 z-10">
+            <SafeImage
+              src="/assets/aistudio/image_fcffa648.png"
+              alt="Minecraft MP Indonesia Servers"
+              className="h-20 w-auto rounded-xl border border-sky-500/40 object-cover shadow-lg shrink-0"
+            />
+            <div className="space-y-1.5 text-center sm:text-left">
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-400 bg-sky-950/90 border border-sky-800 px-2.5 py-0.5 rounded-full">
+                <Globe className="h-3.5 w-3.5" />
+                <span>DIREKTORI SERVER INDONESIA LENGKAP</span>
+              </div>
+              <h3 className="text-xl font-black text-white tracking-tight">
+                Mau Server Indonesia Yang Lebih Lengkap?
+              </h3>
+              <p className="text-xs sm:text-sm text-neutral-300 max-w-xl">
+                Kunjungi situs <strong className="text-sky-300 font-mono">https://minecraft-mp.com/country/indonesia/</strong> untuk melihat ratusan server Minecraft Java Edition Indonesia terpopuler lainnya dengan sistem voting &amp; statistik player realtime.
+              </p>
+            </div>
+          </div>
+
+          <a
+            href={MINECRAFT_MP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 hover:bg-sky-500 px-6 py-3 text-xs sm:text-sm font-bold text-white transition-all shadow-lg shadow-sky-950 shrink-0 z-10 group"
+          >
+            <span>Kunjungi Minecraft-MP.com 🇮🇩</span>
+            <ExternalLink className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+          </a>
         </div>
       </section>
 
