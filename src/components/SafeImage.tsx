@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, 
   AlertTriangle, 
   ImageOff, 
   RefreshCw 
 } from 'lucide-react';
+import { resolvePublicAssetUrl } from '../utils/assetUrl';
 
 interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -26,10 +27,12 @@ export const SafeImage: React.FC<SafeImageProps> = ({
   const [hasError, setHasError] = useState(false);
   const [currentSrc, setCurrentSrc] = useState(src);
 
-  // Normalize path if someone passes /public/
-  const normalizedSrc = currentSrc.startsWith('/public/')
-    ? currentSrc.replace('/public/', '/')
-    : currentSrc;
+  useEffect(() => {
+    setCurrentSrc(src);
+    setHasError(false);
+  }, [src]);
+
+  const normalizedSrc = resolvePublicAssetUrl(currentSrc);
 
   const handleError = () => {
     if (!hasError) {

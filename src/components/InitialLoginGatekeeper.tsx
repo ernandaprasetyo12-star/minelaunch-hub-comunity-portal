@@ -8,6 +8,7 @@ import { SafeImage } from './SafeImage';
 import { SkinAvatarSelector } from './SkinAvatarSelector';
 import { signInWithGoogleFirebase, formatFirebaseAuthError, FIREBASE_PROJECT_ID } from '../lib/firebase';
 import { startElyByOAuthPopup, ElyBySetupInfo } from '../lib/elybyOAuth';
+import { resolvePublicAssetUrl } from '../utils/assetUrl';
 
 interface InitialLoginGatekeeperProps {
   onLoginSuccess: (user: UserProfile) => void;
@@ -160,7 +161,7 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-700 scale-110"
         style={{
-          backgroundImage: 'url(/assets/images/mc_launchers_hero_1794042691092.jpg)',
+          backgroundImage: `url(${resolvePublicAssetUrl('/assets/images/mc_launchers_hero_1794042691092.jpg')})`,
           filter: 'blur(22px)',
           transform: 'scale(1.15)',
         }}

@@ -32,6 +32,7 @@ import { ServersPage } from './components/ServersPage';
 import { ModsPage } from './components/ModsPage';
 import { CommunityChatPage, ChatRoom } from './components/CommunityChatPage';
 import { ShieldCheck, Sparkles, Compass, Crown, MessageSquare } from 'lucide-react';
+import { resolvePublicAssetUrl } from './utils/assetUrl';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isStrictAdminEmail, signOutFirebase } from './lib/firebase';
 import {
@@ -355,7 +356,7 @@ export default function App() {
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center transition-all duration-500 pointer-events-none scale-105"
         style={{
-          backgroundImage: `url(${settings.backgroundWallpaper})`,
+          backgroundImage: `url(${resolvePublicAssetUrl(settings.backgroundWallpaper)})`,
           filter: `blur(${settings.backgroundBlur}px)`,
           transform: 'scale(1.1)', // prevents white edges when blurred
         }}
@@ -709,7 +710,7 @@ export default function App() {
             title="Tanya Craft AI"
           >
             <img
-              src="/assets/aistudio/image_623e557a.png"
+              src={resolvePublicAssetUrl('/assets/aistudio/image_623e557a.png')}
               alt="Craft AI"
               className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
             />

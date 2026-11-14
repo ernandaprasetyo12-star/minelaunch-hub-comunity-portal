@@ -8,6 +8,7 @@ import {
   Globe,
   AlertCircle,
 } from 'lucide-react';
+import { resolvePublicAssetUrl } from '../utils/assetUrl';
 
 interface GroundingSource {
   title: string;
@@ -125,7 +126,7 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
         <div className="flex items-center justify-between border-b border-neutral-800 px-6 py-4 bg-neutral-950/90 shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-600/30 overflow-hidden border border-emerald-500/50">
-              <img src="/assets/aistudio/image_623e557a.png" alt="Craft AI" className="h-full w-full object-cover" />
+              <img src={resolvePublicAssetUrl('/assets/aistudio/image_623e557a.png')} alt="Craft AI" className="h-full w-full object-cover" />
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2 flex-wrap">
@@ -188,7 +189,7 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
                 {msg.role === 'user' ? (
                   <User className="h-4 w-4" />
                 ) : (
-                  <img src="/assets/aistudio/image_623e557a.png" alt="Craft AI" className="h-full w-full object-cover" />
+                  <img src={resolvePublicAssetUrl('/assets/aistudio/image_623e557a.png')} alt="Craft AI" className="h-full w-full object-cover" />
                 )}
               </div>
 
@@ -235,7 +236,7 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
           {isLoading && (
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-800 border border-neutral-700 overflow-hidden shadow-md">
-                <img src="/assets/aistudio/image_623e557a.png" alt="Craft AI" className="h-full w-full object-cover" />
+                <img src={resolvePublicAssetUrl('/assets/aistudio/image_623e557a.png')} alt="Craft AI" className="h-full w-full object-cover" />
               </div>
               <div className="rounded-2xl rounded-tl-none bg-neutral-800/90 border border-neutral-700 px-4 py-3 text-xs text-neutral-400 flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Sparkles, Terminal, Cpu, HardDrive } from 'lucide-react';
 import { SafeImage } from './SafeImage';
+import { resolvePublicAssetUrl } from '../utils/assetUrl';
 
 interface InitialLoadingScreenProps {
   onFinished: () => void;
@@ -55,7 +56,7 @@ export const InitialLoadingScreen: React.FC<InitialLoadingScreenProps> = ({
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-700 ease-out scale-110"
         style={{
-          backgroundImage: `url(${backgroundWallpaper})`,
+          backgroundImage: `url(${resolvePublicAssetUrl(backgroundWallpaper)})`,
           filter: `blur(${backgroundBlur}px)`,
           transform: 'scale(1.15)', // prevents white edges when blurred
         }}
