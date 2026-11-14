@@ -42,6 +42,7 @@ import {
   db,
   isStrictAdminEmail,
   signInWithGoogleFirebase,
+  formatFirebaseAuthError,
   sanitizeAvatarForFirestore,
   handleFirestoreError,
   OperationType,
@@ -352,7 +353,8 @@ export const CommunityChatPage: React.FC<CommunityChatPageProps> = ({
       onLoginSuccess(profile);
     } catch (err: any) {
       console.error('Google verification error:', err);
-      setErrorMsg(err?.message || 'Gagal melakukan verifikasi Google.');
+      const formatted = formatFirebaseAuthError(err);
+      setErrorMsg(formatted.message);
     } finally {
       setIsVerifyingGoogle(false);
     }

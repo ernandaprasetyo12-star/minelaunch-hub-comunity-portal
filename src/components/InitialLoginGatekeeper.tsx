@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { SafeImage } from './SafeImage';
 import { SkinAvatarSelector } from './SkinAvatarSelector';
-import { signInWithGoogleFirebase } from '../lib/firebase';
+import { signInWithGoogleFirebase, formatFirebaseAuthError, FIREBASE_PROJECT_ID } from '../lib/firebase';
 import { startElyByOAuthPopup, ElyBySetupInfo } from '../lib/elybyOAuth';
 
 interface InitialLoginGatekeeperProps {
@@ -21,6 +21,8 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
   const [isElyBySsoLoading, setIsElyBySsoLoading] = useState(false);
   const [elyBySetupInfo, setElyBySetupInfo] = useState<ElyBySetupInfo | null>(null);
   const [copiedCallback, setCopiedCallback] = useState(false);
+  const [unauthorizedDomainHost, setUnauthorizedDomainHost] = useState<string | null>(null);
+  const [copiedDomain, setCopiedDomain] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
   // Default avatar state (Minecraft Steve by default, customizable)
@@ -64,6 +66,7 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
   const handleSelectGoogle = async () => {
     setIsSubmitting(true);
     setAuthError(null);
+    setUnauthorizedDomainHost(null);
     try {
       const profile = await signInWithGoogleFirebase({
         username: customUsername.trim() ? customUsername.trim() : undefined,
@@ -75,13 +78,10 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
       onLoginSuccess(profile);
     } catch (err: any) {
       console.error('Google Sign-In failed:', err);
-      const code = err?.code || '';
-      if (code === 'auth/popup-closed-by-user') {
-        setAuthError('Popup login Google ditutup sebelum selesai. Silakan coba lagi.');
-      } else if (code === 'auth/popup-blocked') {
-        setAuthError('Popup diblokir browser. Izinkan popup untuk masuk dengan Google.');
-      } else {
-        setAuthError(err?.message || 'Gagal otentikasi dengan Google. Pastikan koneksi stabil.');
+      const formatted = formatFirebaseAuthError(err);
+      setAuthError(formatted.message);
+      if (formatted.isUnauthorizedDomain && formatted.hostname) {
+        setUnauthorizedDomainHost(formatted.hostname);
       }
     } finally {
       setIsSubmitting(false);
@@ -186,9 +186,39 @@ export const InitialLoginGatekeeper: React.FC<InitialLoginGatekeeperProps> = ({ 
         </div>
 
         {authError && (
-          <div className="rounded-xl border border-red-700/80 bg-red-950/60 px-3.5 py-2.5 text-left text-xs text-red-200 flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
-            <span>{authError}</span>
+          <div className="rounded-xl border border-red-700/80 bg-red-950/60 px-3.5 py-2.5 text-left text-xs text-red-200 space-y-2">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+              <span>{authError}</span>
+            </div>
+            {unauthorizedDomainHost && (
+              <div className="pl-6 space-y-1.5">
+                <div className="flex items-center gap-1.5 bg-neutral-950/80 border border-red-800/60 rounded-lg px-2.5 py-1.5">
+                  <code className="text-[10px] text-amber-300 truncate flex-1">{unauthorizedDomainHost}</code>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(unauthorizedDomainHost);
+                      setCopiedDomain(true);
+                      setTimeout(() => setCopiedDomain(false), 2000);
+                    }}
+                    className="inline-flex items-center gap-1 rounded bg-neutral-800 hover:bg-neutral-700 px-2 py-0.5 text-[10px] font-bold text-white shrink-0"
+                  >
+                    {copiedDomain ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                    <span>{copiedDomain ? 'Disalin' : 'Salin Domain'}</span>
+                  </button>
+                </div>
+                <a
+                  href={`https://console.firebase.google.com/project/${FIREBASE_PROJECT_ID}/authentication/settings`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-300 hover:text-sky-200 underline"
+                >
+                  <span>Buka Firebase Authorized Domains</span>
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            )}
           </div>
         )}
 

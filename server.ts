@@ -418,14 +418,39 @@ Gunakan bahasa Indonesia yang ramah, cerdas, rapi, terstruktur, dan langsung men
     }
     contents.push({ role: 'user', parts: [{ text: message.trim() }] });
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-4-hydrogen',
-      contents,
-      config: {
-        systemInstruction,
-        tools: [{ googleSearch: {} }],
-      },
-    });
+    let response;
+    let usedFallbackNotice = false;
+
+    try {
+      response = await ai.models.generateContent({
+        model: 'gemini-4-hydrogen',
+        contents,
+        config: {
+          systemInstruction,
+          tools: [{ googleSearch: {} }],
+        },
+      });
+    } catch (primaryErr: any) {
+      const primaryMsg = String(primaryErr?.message || '');
+      console.warn('Craft AI primary (gemini-4-hydrogen + search) failed, retrying without search:', primaryMsg);
+      try {
+        response = await ai.models.generateContent({
+          model: 'gemini-4-hydrogen',
+          contents,
+          config: { systemInstruction },
+        });
+        usedFallbackNotice = true;
+      } catch (secondaryErr: any) {
+        const secMsg = String(secondaryErr?.message || '');
+        console.warn('Craft AI secondary (gemini-4-hydrogen) failed, retrying with gemini-3.1-flash-lite:', secMsg);
+        response = await ai.models.generateContent({
+          model: 'gemini-3.1-flash-lite',
+          contents,
+          config: { systemInstruction },
+        });
+        usedFallbackNotice = true;
+      }
+    }
 
     const reply =
       response.text ||
@@ -446,9 +471,32 @@ Gunakan bahasa Indonesia yang ramah, cerdas, rapi, terstruktur, dan langsung men
       }
     }
 
-    res.json({ reply, sources });
+    res.json({ reply, sources, groundingUsed: !usedFallbackNotice });
   } catch (error: any) {
     console.error('Craft AI Error:', error);
+    const rawMsg = String(error?.message || '');
+    const status = Number(error?.status || 500);
+
+    if (status === 429 || rawMsg.includes('RESOURCE_EXHAUSTED') || rawMsg.includes('429')) {
+      return res.status(429).json({
+        error: 'Kuota Google Gemini sedang penuh (429 RESOURCE_EXHAUSTED)',
+        details:
+          'Batas penggunaan harian atau per menit API key Gemini saat ini telah habis. Silakan tunggu beberapa saat atau pilih API key berbayar di Settings > Secrets pada AI Studio.',
+      });
+    }
+
+    if (
+      status === 403 ||
+      status === 400 ||
+      rawMsg.includes('PERMISSION_DENIED') ||
+      rawMsg.includes('API_KEY_INVALID')
+    ) {
+      return res.status(403).json({
+        error: 'Akses API Google Gemini ditolak',
+        details: 'Periksa kembali API key Gemini pada panel Settings > Secrets di AI Studio.',
+      });
+    }
+
     res.status(500).json({
       error: 'Gagal menghubungi Craft AI (Google Gemini)',
       details: error?.message || 'Unknown error',
@@ -491,7 +539,14 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static(path.join(import.meta.dirname, 'dist')));
+    const distDir = path.join(import.meta.dirname, 'dist');
+    app.use(express.static(distDir));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api/') || req.path.startsWith('/ws/')) {
+        return next();
+      }
+      return res.sendFile(path.join(distDir, 'index.html'));
+    });
   }
 
   const httpServer = http.createServer(app);

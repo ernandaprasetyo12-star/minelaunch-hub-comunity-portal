@@ -19,6 +19,42 @@ import firebaseConfig from '../../firebase-applet-config.json';
 import { UserProfile, UserRole } from '../types/auth';
 
 export const ADMIN_EMAIL = 'ernanda.prasetyo12@gmail.com';
+export const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
+
+export function formatFirebaseAuthError(err: any): {
+  message: string;
+  isUnauthorizedDomain: boolean;
+  hostname: string;
+} {
+  const code = String(err?.code || '');
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  if (code === 'auth/popup-closed-by-user') {
+    return {
+      message: 'Popup login Google ditutup sebelum selesai. Silakan coba lagi.',
+      isUnauthorizedDomain: false,
+      hostname,
+    };
+  }
+  if (code === 'auth/popup-blocked') {
+    return {
+      message: 'Popup diblokir browser. Izinkan popup untuk masuk dengan Google.',
+      isUnauthorizedDomain: false,
+      hostname,
+    };
+  }
+  if (code === 'auth/unauthorized-domain' || String(err?.message || '').includes('auth/unauthorized-domain')) {
+    return {
+      message: `Domain "${hostname}" belum terdaftar di Authorized Domains Firebase Authentication (${FIREBASE_PROJECT_ID}). Tambahkan domain ini di Firebase Console → Authentication → Settings → Authorized domains, lalu refresh halaman.`,
+      isUnauthorizedDomain: true,
+      hostname,
+    };
+  }
+  return {
+    message: err?.message || 'Gagal otentikasi dengan Google. Pastikan koneksi stabil.',
+    isUnauthorizedDomain: false,
+    hostname,
+  };
+}
 
 export function isStrictAdminEmail(
   email?: string | null,

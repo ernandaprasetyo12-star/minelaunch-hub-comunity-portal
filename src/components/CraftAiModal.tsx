@@ -83,13 +83,21 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
           },
         ]);
       } else {
-        const errorDetail = data?.details || data?.error || `Server merespons status ${res.status}`;
+        let errorMessage = '';
+        if (res.status === 404) {
+          errorMessage =
+            'Endpoint Craft AI (/api/craft-ai) belum merespons (404). Jika Anda membuka halaman versi lama atau link Share sebelum update terbaru, muat ulang halaman atau publikasikan ulang aplikasi agar server backend aktif.';
+        } else {
+          const errorDetail =
+            data?.details || data?.error || `Server merespons status ${res.status}`;
+          errorMessage = `Maaf, Craft AI belum bisa merespons saat ini (${errorDetail}).`;
+        }
         setMessages((prev) => [
           ...prev,
           {
             role: 'model',
             isError: true,
-            text: `Maaf, gagal terhubung ke Google Gemini saat ini (${errorDetail}). Pastikan server Node.js & GEMINI_API_KEY aktif, lalu coba lagi.`,
+            text: errorMessage,
           },
         ]);
       }
