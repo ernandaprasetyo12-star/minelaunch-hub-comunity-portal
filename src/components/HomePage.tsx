@@ -21,7 +21,9 @@ import {
   Copy,
   Check,
   Globe,
-  Wifi
+  Wifi,
+  MessageSquare,
+  Bot
 } from 'lucide-react';
 import { AppViewMode } from './Navbar';
 import { LauncherItem } from '../data/launchers';
@@ -161,6 +163,22 @@ export const HomePage: React.FC<HomePageProps> = ({
                 >
                   <Sparkles className="h-4 w-4 text-orange-400" />
                   <span>Mods &amp; Addons</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('chat')}
+                  className="inline-flex items-center gap-2 rounded-xl border border-teal-700/80 bg-teal-950/50 px-4 py-2.5 text-sm font-semibold text-teal-300 hover:bg-teal-900/60 transition-all"
+                >
+                  <MessageSquare className="h-4 w-4 text-teal-400" />
+                  <span>Live Chat Komunitas</span>
+                </button>
+
+                <button
+                  onClick={onOpenCraftAi}
+                  className="inline-flex items-center gap-2 rounded-xl border border-emerald-700/80 bg-emerald-950/50 px-4 py-2.5 text-sm font-semibold text-emerald-300 hover:bg-emerald-900/60 transition-all"
+                >
+                  <Bot className="h-4 w-4 text-emerald-400" />
+                  <span>Tanya Craft AI (Gemini)</span>
                 </button>
 
                 <button
@@ -393,6 +411,33 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
             <div className="mt-5 pt-4 border-t border-neutral-800/80 flex items-center justify-between text-xs font-semibold text-purple-400 group-hover:translate-x-0.5 transition-transform">
               <span>Lihat Tabel Komparasi</span>
+              <ArrowRight className="h-4 w-4" />
+            </div>
+          </div>
+
+          {/* Portal 7: Live Chat Komunitas Real-Time */}
+          <div 
+            onClick={() => onNavigate('chat')}
+            className="group cursor-pointer rounded-2xl border border-teal-900/60 bg-neutral-900/60 p-6 hover:border-teal-500 hover:bg-neutral-900 transition-all hover:shadow-xl hover:shadow-teal-950/30 flex flex-col justify-between"
+          >
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-950 text-teal-400 border border-teal-800/80 group-hover:scale-105 transition-transform">
+                  <MessageSquare className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-bold text-teal-300 bg-teal-950/80 border border-teal-800 px-2.5 py-1 rounded-md">
+                  Real-Time + Sensor ###
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-teal-400 transition-colors">
+                Live Chat Komunitas Indonesia
+              </h3>
+              <p className="text-xs text-neutral-300 leading-relaxed">
+                Ngobrol real-time bersama pemain lain, cari party server Indo, diskusi mod, dengan sistem sensor kata kasar otomatis (### / ***) dan moderasi Admin.
+              </p>
+            </div>
+            <div className="mt-5 pt-4 border-t border-neutral-800/80 flex items-center justify-between text-xs font-semibold text-teal-400 group-hover:translate-x-0.5 transition-transform">
+              <span>Masuk ke Ruang Live Chat</span>
               <ArrowRight className="h-4 w-4" />
             </div>
           </div>

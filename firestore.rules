@@ -1,0 +1,193 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Hardened Global Helpers
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isVerified() && request.auth.uid == userId;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerified() && request.auth.token.email == 'ernanda.prasetyo12@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (isVerified() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    // 3. Entity Validation Blueprints
+    function isValidUserPublic(data) {
+      return data.keys().hasAll(['uid', 'username', 'displayName', 'avatarUrl', 'provider', 'hasOfficialLicense', 'hasElyBySkin', 'role', 'joinedAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'username', 'displayName', 'avatarUrl', 'provider', 'hasOfficialLicense', 'hasElyBySkin', 'skinCapeName', 'role', 'joinedAt', 'updatedAt'])
+        && isValidId(data.uid)
+        && data.username is string && data.username.size() >= 1 && data.username.size() <= 50
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80
+        && data.avatarUrl is string && data.avatarUrl.size() <= 2048
+        && data.provider in ['google', 'microsoft', 'elyby', 'offline']
+        && data.hasOfficialLicense is bool
+        && data.hasElyBySkin is bool
+        && (!('skinCapeName' in data) || (data.skinCapeName is string && data.skinCapeName.size() <= 100))
+        && data.role in ['admin', 'user']
+        && data.joinedAt is string && data.joinedAt.size() <= 64
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidUserPrivate(data) {
+      return data.keys().hasAll(['uid', 'email', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'email', 'updatedAt'])
+        && isValidId(data.uid)
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 254
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidAdminEntry(data) {
+      return data.keys().hasAll(['uid', 'email', 'grantedAt'])
+        && data.keys().hasOnly(['uid', 'email', 'grantedAt'])
+        && isValidId(data.uid)
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 254
+        && data.grantedAt is timestamp;
+    }
+
+    function isValidChatMessage(data) {
+      return data.keys().hasAll(['id', 'senderUid', 'senderName', 'senderAvatar', 'senderRole', 'text', 'censored', 'room', 'isPinned', 'createdAt'])
+        && data.keys().hasOnly(['id', 'senderUid', 'senderName', 'senderAvatar', 'senderRole', 'text', 'censored', 'room', 'isPinned', 'createdAt'])
+        && isValidId(data.id)
+        && isValidId(data.senderUid)
+        && data.senderName is string && data.senderName.size() >= 1 && data.senderName.size() <= 80
+        && data.senderAvatar is string && data.senderAvatar.size() <= 2048
+        && data.senderRole in ['admin', 'user']
+        && data.text is string && data.text.size() >= 1 && data.text.size() <= 1000
+        && data.censored is bool
+        && data.room in ['general', 'server-indo', 'mods-help']
+        && data.isPinned is bool
+        && data.createdAt is timestamp;
+    }
+
+    function isValidChatConfig(data) {
+      return data.keys().hasAll(['announcement', 'slowModeSeconds', 'updatedByUid', 'updatedAt'])
+        && data.keys().hasOnly(['announcement', 'slowModeSeconds', 'updatedByUid', 'updatedAt'])
+        && data.announcement is string && data.announcement.size() <= 500
+        && data.slowModeSeconds is number && data.slowModeSeconds >= 0 && data.slowModeSeconds <= 300
+        && isValidId(data.updatedByUid)
+        && data.updatedAt is timestamp;
+    }
+
+    // 4. Collection Rules
+    match /users_public/{userId} {
+      allow get: if isSignedIn() && isValidId(userId);
+      allow list: if isAdmin() || (isVerified() && resource.data.uid == request.auth.uid);
+      allow create: if isOwner(userId)
+        && isValidId(userId)
+        && isValidUserPublic(incoming())
+        && incoming().uid == request.auth.uid
+        && incoming().updatedAt == request.time
+        && (incoming().role == 'user' || (incoming().role == 'admin' && isAdmin()));
+      allow update: if isSignedIn()
+        && isValidId(userId)
+        && isValidUserPublic(incoming())
+        && incoming().uid == existing().uid
+        && incoming().joinedAt == existing().joinedAt
+        && incoming().updatedAt == request.time
+        && (
+          isAdmin() ||
+          (isOwner(userId) && incoming().role == existing().role && incoming().diff(existing()).affectedKeys().hasOnly(['username', 'displayName', 'avatarUrl', 'provider', 'hasOfficialLicense', 'hasElyBySkin', 'skinCapeName', 'updatedAt']))
+        );
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    match /users_private/{userId} {
+      allow get: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+      allow list: if isAdmin() || (isVerified() && resource.data.uid == request.auth.uid);
+      allow create: if isOwner(userId)
+        && isValidId(userId)
+        && isValidUserPrivate(incoming())
+        && incoming().uid == request.auth.uid
+        && incoming().updatedAt == request.time;
+      allow update: if (isOwner(userId) || isAdmin())
+        && isValidId(userId)
+        && isValidUserPrivate(incoming())
+        && incoming().uid == existing().uid
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['email', 'updatedAt']);
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    match /admins/{userId} {
+      allow get: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+      allow list: if isAdmin();
+      allow create: if isBootstrappedAdmin()
+        && isValidId(userId)
+        && isValidAdminEntry(incoming())
+        && incoming().uid == userId
+        && incoming().email == 'ernanda.prasetyo12@gmail.com'
+        && incoming().grantedAt == request.time;
+      allow update, delete: if false;
+    }
+
+    match /chat_messages/{messageId} {
+      allow get: if isSignedIn() && isValidId(messageId);
+      allow list: if isSignedIn() && resource.data.room in ['general', 'server-indo', 'mods-help'];
+      allow create: if isVerified()
+        && isValidId(messageId)
+        && isValidChatMessage(incoming())
+        && incoming().id == messageId
+        && incoming().senderUid == request.auth.uid
+        && incoming().createdAt == request.time
+        && (incoming().senderRole == 'user' || (incoming().senderRole == 'admin' && isAdmin()))
+        && (incoming().isPinned == false || isAdmin());
+      allow update: if isAdmin()
+        && isValidId(messageId)
+        && isValidChatMessage(incoming())
+        && incoming().id == existing().id
+        && incoming().senderUid == existing().senderUid
+        && incoming().senderRole == existing().senderRole
+        && incoming().room == existing().room
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['isPinned', 'text', 'censored']);
+      allow delete: if (isAdmin() || (isVerified() && existing().senderUid == request.auth.uid)) && isValidId(messageId);
+    }
+
+    match /chat_config/{configId} {
+      allow get: if isSignedIn() && isValidId(configId) && configId == 'global';
+      allow list: if false;
+      allow create: if isAdmin()
+        && isValidId(configId)
+        && configId == 'global'
+        && isValidChatConfig(incoming())
+        && incoming().updatedByUid == request.auth.uid
+        && incoming().updatedAt == request.time;
+      allow update: if isAdmin()
+        && isValidId(configId)
+        && configId == 'global'
+        && isValidChatConfig(incoming())
+        && incoming().updatedByUid == request.auth.uid
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['announcement', 'slowModeSeconds', 'updatedByUid', 'updatedAt']);
+      allow delete: if false;
+    }
+  }
+}

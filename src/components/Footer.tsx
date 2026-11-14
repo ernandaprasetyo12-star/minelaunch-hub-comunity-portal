@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, ShieldAlert, Sparkles, Layers, BookOpen, BarChart3, Compass } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Sparkles, Layers, BookOpen, BarChart3, Compass, MessageSquare } from 'lucide-react';
 import { AppViewMode } from './Navbar';
 
 interface FooterProps {
@@ -96,6 +96,18 @@ export const Footer: React.FC<FooterProps> = ({
                 >
                   <Sparkles className="h-3 w-3 text-sky-400" />
                   <span>Launcher Non-Lisensi & Ely.by (XMCL, SK, FreeSM)</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => {
+                    onNavigate('chat');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="hover:text-teal-400 transition-colors flex items-center gap-1.5"
+                >
+                  <MessageSquare className="h-3 w-3 text-teal-400" />
+                  <span>Live Chat Komunitas (Real-Time)</span>
                 </button>
               </li>
               <li>

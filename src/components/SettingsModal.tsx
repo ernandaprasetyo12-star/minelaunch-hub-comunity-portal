@@ -17,12 +17,14 @@ import {
   CheckCircle2,
   User,
   Save,
-  Shield
+  Shield,
+  Crown
 } from 'lucide-react';
 import { AppSettings, WALLPAPER_PRESETS } from '../types/settings';
 import { UserProfile } from '../types/auth';
 import { SkinAvatarSelector } from './SkinAvatarSelector';
 import { SafeImage } from './SafeImage';
+import { syncProfileToFirestore } from '../lib/firebase';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -380,8 +382,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <h3 className="text-base font-bold text-white flex items-center gap-2 flex-wrap">
                         <span>{profileDisplayName || user?.displayName || 'Pemain Minecraft'}</span>
+                        {user?.role === 'admin' ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 border border-amber-500/70 px-2 py-0.5 text-[10px] font-black text-amber-300">
+                            <Crown className="h-3 w-3" />
+                            <span>ADMIN UTAMA</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-neutral-800 border border-neutral-700 px-2 py-0.5 text-[10px] font-bold text-neutral-300">
+                            USER BIASA
+                          </span>
+                        )}
                         {profileHasOfficial && (
                           <span title="Lisensi Resmi Mojang">
                             <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
@@ -504,21 +516,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Save Profile Button */}
                 <div className="flex justify-end pt-2">
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (onUpdateUser && user) {
-                        onUpdateUser({
+                        const updated: UserProfile = {
                           ...user,
                           displayName: profileDisplayName.trim() || user.displayName,
                           username: profileUsername.trim() || user.username,
                           avatarUrl: profileAvatarUrl,
                           hasOfficialLicense: profileHasOfficial,
                           hasElyBySkin: profileHasElyBy,
-                        });
+                        };
+                        onUpdateUser(updated);
+                        void syncProfileToFirestore(updated).catch(console.error);
                         setProfileSaved(true);
                         setTimeout(() => setProfileSaved(false), 2500);
                       } else if (onUpdateUser) {
                         onUpdateUser({
                           id: 'user_' + Date.now(),
+                          role: 'user',
                           displayName: profileDisplayName.trim() || 'Pemain MineLaunch',
                           username: profileUsername.trim() || 'steve_player',
                           avatarUrl: profileAvatarUrl,

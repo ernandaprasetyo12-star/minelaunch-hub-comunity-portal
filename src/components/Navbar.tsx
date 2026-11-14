@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { 
   ShieldAlert, Compass, User, LogOut, Sparkles, ShieldCheck, 
   BookOpen, Layers, BarChart3, Menu, X, Settings,
-  ArrowLeft, Server
+  ArrowLeft, Server, MessageSquare, Crown
 } from 'lucide-react';
 import { UserProfile } from '../types/auth';
 
-export type AppViewMode = 'home' | 'catalog' | 'licensed' | 'non-licensed' | 'dangerous' | 'servers' | 'mods' | 'about' | 'comparison';
+export type AppViewMode = 'home' | 'catalog' | 'licensed' | 'non-licensed' | 'dangerous' | 'servers' | 'mods' | 'chat' | 'about' | 'comparison';
 
 interface NavbarProps {
   currentView: AppViewMode;
@@ -149,6 +149,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           <button
+            onClick={() => handleNavigate('chat')}
+            className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 px-2 py-1 rounded-lg ${
+              currentView === 'chat'
+                ? 'text-teal-300 bg-teal-950/60 border border-teal-700/80 font-bold'
+                : 'text-teal-300 hover:text-teal-200 hover:bg-neutral-900'
+            }`}
+          >
+            <MessageSquare className="h-3.5 w-3.5 shrink-0 text-teal-400" />
+            <span>Live Chat</span>
+          </button>
+
+          <button
             onClick={() => handleNavigate('dangerous')}
             className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 px-2 py-1 rounded-lg ${
               currentView === 'dangerous'
@@ -208,8 +220,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 referrerPolicy="no-referrer"
               />
               <div className="text-left hidden md:block">
-                <div className="text-xs font-bold text-white flex items-center gap-1 truncate max-w-[100px]">
-                  <span>{user.username}</span>
+                <div className="text-xs font-bold text-white flex items-center gap-1 truncate max-w-[120px]">
+                  <span className="truncate">{user.username}</span>
+                  {user.role === 'admin' && (
+                    <span title="Admin Terverifikasi">
+                      <Crown className="h-3 w-3 text-amber-400 shrink-0" />
+                    </span>
+                  )}
                   {user.hasOfficialLicense && (
                     <span title="Lisensi Resmi Mojang">
                       <ShieldCheck className="h-3 w-3 text-emerald-400 shrink-0" />
@@ -221,8 +238,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </span>
                   )}
                 </div>
-                <div className="text-[9px] text-neutral-400 capitalize font-mono">
-                  {user.provider}
+                <div className="text-[9px] text-neutral-400 font-mono flex items-center gap-1">
+                  <span className={user.role === 'admin' ? 'text-amber-400 font-bold' : ''}>
+                    {user.role === 'admin' ? 'ADMIN' : 'USER'}
+                  </span>
+                  <span>·</span>
+                  <span className="capitalize">{user.provider}</span>
                 </div>
               </div>
               <button
@@ -334,6 +355,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <Sparkles className="h-4 w-4 shrink-0 text-orange-400" />
             <span>Mods &amp; Addons (Modrinth / CurseForge)</span>
+          </button>
+
+          <button
+            onClick={() => handleNavigate('chat')}
+            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+              currentView === 'chat' ? 'bg-teal-950 border border-teal-800 text-teal-300' : 'text-teal-300 hover:bg-neutral-900'
+            }`}
+          >
+            <MessageSquare className="h-4 w-4 shrink-0 text-teal-400" />
+            <span>Live Chat Komunitas (Real-Time)</span>
           </button>
 
           <button

@@ -1,0 +1,198 @@
+{
+  "entities": {
+    "UserPublic": {
+      "title": "UserPublic",
+      "description": "Public profile and non-sensitive display metadata for a MineLaunch Hub user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "avatarUrl": {
+          "type": "string",
+          "maxLength": 2048
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["google", "microsoft", "elyby", "offline"]
+        },
+        "hasOfficialLicense": {
+          "type": "boolean"
+        },
+        "hasElyBySkin": {
+          "type": "boolean"
+        },
+        "skinCapeName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user"]
+        },
+        "joinedAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "username", "displayName", "avatarUrl", "provider", "hasOfficialLicense", "hasElyBySkin", "role", "joinedAt", "updatedAt"]
+    },
+    "UserPrivate": {
+      "title": "UserPrivate",
+      "description": "Isolated PII storage for authenticated user email.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "updatedAt"]
+    },
+    "AdminEntry": {
+      "title": "AdminEntry",
+      "description": "Trusted admin registry keyed by UID.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254
+        },
+        "grantedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "grantedAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Real-time community chat message with profanity censorship metadata.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "senderUid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "senderName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "senderAvatar": {
+          "type": "string",
+          "maxLength": 2048
+        },
+        "senderRole": {
+          "type": "string",
+          "enum": ["admin", "user"]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "censored": {
+          "type": "boolean"
+        },
+        "room": {
+          "type": "string",
+          "enum": ["general", "server-indo", "mods-help"]
+        },
+        "isPinned": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "senderUid", "senderName", "senderAvatar", "senderRole", "text", "censored", "room", "isPinned", "createdAt"]
+    },
+    "ChatConfig": {
+      "title": "ChatConfig",
+      "description": "Global chat room announcement and moderation settings controlled only by Admin.",
+      "type": "object",
+      "properties": {
+        "announcement": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "slowModeSeconds": {
+          "type": "number"
+        },
+        "updatedByUid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["announcement", "slowModeSeconds", "updatedByUid", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "users_public/{userId}": {
+      "schema": { "$ref": "#/entities/UserPublic" },
+      "description": "Public profile metadata without PII."
+    },
+    "users_private/{userId}": {
+      "schema": { "$ref": "#/entities/UserPrivate" },
+      "description": "Private PII document containing user email."
+    },
+    "admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminEntry" },
+      "description": "Admin authorization registry."
+    },
+    "chat_messages/{messageId}": {
+      "schema": { "$ref": "#/entities/ChatMessage" },
+      "description": "Real-time community chat messages filtered by room."
+    },
+    "chat_config/{configId}": {
+      "schema": { "$ref": "#/entities/ChatConfig" },
+      "description": "Global moderation and pinned announcement config."
+    }
+  }
+}

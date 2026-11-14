@@ -30,7 +30,10 @@ import { CraftAiModal } from './components/CraftAiModal';
 import { MineLaunchDownloadModal } from './components/MineLaunchDownloadModal';
 import { ServersPage } from './components/ServersPage';
 import { ModsPage } from './components/ModsPage';
-import { ShieldCheck, Sparkles, Compass } from 'lucide-react';
+import { CommunityChatPage, ChatRoom } from './components/CommunityChatPage';
+import { ShieldCheck, Sparkles, Compass, Crown, MessageSquare } from 'lucide-react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth, isStrictAdminEmail, signOutFirebase } from './lib/firebase';
 
 export default function App() {
   // Initial Flow States
@@ -74,8 +77,44 @@ export default function App() {
     }
   };
 
-  // Dedicated Navigation View State ('home' | 'catalog' | 'licensed' | 'non-licensed' | 'dangerous' | 'about' | 'comparison')
-  const [currentView, setCurrentView] = useState<AppViewMode>('home');
+  // Dedicated Navigation View State ('home' | 'catalog' | 'licensed' | 'non-licensed' | 'dangerous' | 'servers' | 'mods' | 'chat' | 'about' | 'comparison')
+  const [currentView, setCurrentView] = useState<AppViewMode>(() => {
+    if (typeof window !== 'undefined' && window.location.hash.startsWith('#live-chat')) {
+      return 'chat';
+    }
+    return 'home';
+  });
+
+  const [activeChatRoom, setActiveChatRoom] = useState<ChatRoom>(() => {
+    if (typeof window !== 'undefined' && window.location.hash.startsWith('#live-chat/')) {
+      const slug = window.location.hash.replace('#live-chat/', '') as ChatRoom;
+      if (slug === 'general' || slug === 'server-indo' || slug === 'mods-help') {
+        return slug;
+      }
+    }
+    return 'general';
+  });
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const h = window.location.hash;
+      if (h.startsWith('#live-chat')) {
+        setCurrentView('chat');
+        const slug = h.replace('#live-chat/', '') as ChatRoom;
+        if (slug === 'general' || slug === 'server-indo' || slug === 'mods-help') {
+          setActiveChatRoom(slug);
+        }
+      } else if (currentView === 'chat' && !h.startsWith('#live-chat')) {
+        setCurrentView('home');
+      }
+    };
+    window.addEventListener('hashchange', syncFromHash);
+    window.addEventListener('popstate', syncFromHash);
+    return () => {
+      window.removeEventListener('hashchange', syncFromHash);
+      window.removeEventListener('popstate', syncFromHash);
+    };
+  }, [currentView]);
 
   // Modals state
   const [detailLauncher, setDetailLauncher] = useState<LauncherItem | null>(null);
@@ -89,15 +128,63 @@ export default function App() {
   const [isPotatoModalOpen, setIsPotatoModalOpen] = useState<boolean>(false);
   const [isCraftAiOpen, setIsCraftAiOpen] = useState<boolean>(false);
 
-  // User state
+  // User state (sanitize localStorage so role: 'admin' cannot be spoofed without Firebase Auth)
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     try {
       const saved = localStorage.getItem('minelaunch_user');
-      return saved ? JSON.parse(saved) : null;
+      if (!saved) return null;
+      const parsed = JSON.parse(saved) as UserProfile;
+      return {
+        ...parsed,
+        role:
+          parsed.provider === 'google' && isStrictAdminEmail(parsed.email, parsed.emailVerified)
+            ? 'admin'
+            : 'user',
+      };
     } catch {
       return null;
     }
   });
+
+  // Synchronize Firebase Auth state with strict Admin RBAC check
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      setCurrentUser((prev) => {
+        if (fbUser && fbUser.emailVerified) {
+          const strictRole = isStrictAdminEmail(fbUser.email, fbUser.emailVerified)
+            ? 'admin'
+            : 'user';
+          if (prev && prev.provider === 'google' && prev.uid === fbUser.uid) {
+            const synced: UserProfile = {
+              ...prev,
+              role: strictRole,
+              email: fbUser.email || prev.email,
+              emailVerified: fbUser.emailVerified,
+            };
+            try {
+              localStorage.setItem('minelaunch_user', JSON.stringify(synced));
+            } catch {
+              // ignore
+            }
+            return synced;
+          }
+          return prev;
+        }
+        // If no verified Firebase Google session, force role to 'user'
+        if (prev && prev.role === 'admin') {
+          const downgraded: UserProfile = { ...prev, role: 'user', emailVerified: false };
+          try {
+            localStorage.setItem('minelaunch_user', JSON.stringify(downgraded));
+          } catch {
+            // ignore
+          }
+          return downgraded;
+        }
+        return prev;
+      });
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleOpenSettings = (tab: 'appearance' | 'profile' | 'android' | 'security' = 'appearance') => {
     setSettingsTab(tab);
@@ -115,7 +202,17 @@ export default function App() {
 
   const handleNavigate = (view: AppViewMode) => {
     setCurrentView(view);
+    if (view === 'chat') {
+      window.history.pushState(null, '', `#live-chat/${activeChatRoom}`);
+    } else if (window.location.hash.startsWith('#live-chat')) {
+      window.history.pushState(null, '', window.location.pathname + window.location.search);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleChatRoomChange = (room: ChatRoom) => {
+    setActiveChatRoom(room);
+    window.history.replaceState(null, '', `#live-chat/${room}`);
   };
 
   const handleInitialLoginSuccess = (user: UserProfile) => {
@@ -141,6 +238,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    void signOutFirebase();
     setCurrentUser(null);
     setHasCompletedInitialLogin(false);
     try {
@@ -230,206 +328,239 @@ export default function App() {
         <div className="fixed inset-0 z-0 opacity-20 pointer-events-none bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:28px_28px]" />
       )}
 
-      {/* Main Container Wrapper */}
-      <div className={`relative z-10 flex flex-col min-h-screen ${settings.androidDeviceMode === 'phone' ? 'max-w-md mx-auto shadow-2xl border-x border-neutral-800' : ''}`}>
-        {/* Navbar with View Toggles, Brand Logo, and Settings Trigger */}
-        <Navbar
+      {/* Main Container Wrapper: Completely separate Live Chat workspace vs Home/Directory Portal */}
+      {currentView === 'chat' ? (
+        <div className={`relative z-10 h-screen overflow-hidden ${settings.androidDeviceMode === 'phone' ? 'max-w-md mx-auto shadow-2xl border-x border-neutral-800' : ''}`}>
+          <CommunityChatPage
+            user={currentUser}
+            initialRoom={activeChatRoom}
+            onRoomChange={handleChatRoomChange}
+            onLoginSuccess={handleLoginSuccess}
+            onNavigate={handleNavigate}
+            onOpenCraftAi={() => setIsCraftAiOpen(true)}
+            onOpenSettings={(tab) => handleOpenSettings(tab || 'profile')}
+          />
+        </div>
+      ) : (
+        <div className={`relative z-10 flex flex-col min-h-screen ${settings.androidDeviceMode === 'phone' ? 'max-w-md mx-auto shadow-2xl border-x border-neutral-800' : ''}`}>
+          {/* Navbar with View Toggles, Brand Logo, and Settings Trigger */}
+          <Navbar
+            currentView={currentView}
+            onChangeView={handleNavigate}
+            onOpenSafetyGuide={() => setIsSafetyChecklistOpen(true)}
+            onOpenTour={() => setIsTourModalOpen(true)}
+            onOpenLogin={() => setIsLoginModalOpen(true)}
+            onOpenSettings={(tab) => handleOpenSettings(tab || 'appearance')}
+            user={currentUser}
+            onLogout={handleLogout}
+          />
+
+          {/* Main Content Area */}
+          <main className="flex-1 pb-20">
+            {/* User Account Bar if logged in */}
+            {currentUser && (
+              <div className="bg-neutral-900/60 border-b border-white/5 backdrop-blur-md px-4 py-2">
+                <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-neutral-400">Akun Aktif:</span>
+                    <button 
+                      onClick={() => handleOpenSettings('profile')}
+                      className="text-white font-semibold hover:text-emerald-400 hover:underline transition-colors flex items-center gap-1"
+                      title="Buka Pengaturan Profil"
+                    >
+                      <span>{currentUser.displayName}</span>
+                    </button>
+                    {currentUser.role === 'admin' ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 border border-amber-500/70 px-2 py-0.5 text-[10px] font-black text-amber-300">
+                        <Crown className="h-3 w-3" />
+                        <span>ADMIN</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-full bg-neutral-800 border border-neutral-700 px-2 py-0.5 text-[10px] font-semibold text-neutral-300">
+                        USER BIASA
+                      </span>
+                    )}
+                    <span className="text-neutral-600">·</span>
+                    {currentUser.hasOfficialLicense && (
+                      <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        <span>Lisensi Resmi Mojang</span>
+                      </span>
+                    )}
+                    {currentUser.hasElyBySkin && (
+                      <span className="inline-flex items-center gap-1 text-sky-400 font-medium">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        <span>Skin & Jubah Ely.by ({currentUser.skinCapeName})</span>
+                      </span>
+                    )}
+                    <button
+                      onClick={() => handleNavigate('chat')}
+                      className="inline-flex items-center gap-1 text-teal-300 hover:text-teal-200 font-semibold ml-1"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      <span>Buka Live Chat</span>
+                    </button>
+                  </div>
+
+                  <div className="text-neutral-400 flex items-center gap-2">
+                    <button
+                      onClick={() => handleOpenSettings('profile')}
+                      className="text-emerald-400 hover:underline flex items-center gap-1 font-medium"
+                    >
+                      <span>Edit Profil & Skin Avatar</span>
+                    </button>
+                    <span>·</span>
+                    <button
+                      onClick={() => setIsTourModalOpen(true)}
+                      className="text-neutral-300 hover:text-white flex items-center gap-1"
+                    >
+                      <Compass className="h-3 w-3" />
+                      <span>Panduan Tour</span>
+                    </button>
+                    <span>·</span>
+                    <button
+                      onClick={handleLogout}
+                      className="text-red-400 hover:underline"
+                    >
+                      Ganti Akun
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PAGE 1: BERANDA UTAMA (HOME) */}
+            {currentView === 'home' && (
+              <HomePage
+                onNavigate={handleNavigate}
+                onOpenSafetyChecklist={() => setIsSafetyChecklistOpen(true)}
+                onOpenTour={() => setIsTourModalOpen(true)}
+                onOpenSettings={() => setIsSettingsOpen(true)}
+                onOpenPotatoModal={() => setIsPotatoModalOpen(true)}
+                onOpenCraftAi={() => setIsCraftAiOpen(true)}
+                onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
+                onOpenDetail={(launcher) => setDetailLauncher(launcher)}
+                sampleLaunchers={sampleLaunchers}
+              />
+            )}
+
+            {/* PAGE 2: KATALOG LENGKAP (ALL LAUNCHERS) */}
+            {currentView === 'catalog' && (
+              <CatalogPage
+                launchers={LAUNCHERS}
+                onNavigate={handleNavigate}
+                onOpenDetail={(launcher) => setDetailLauncher(launcher)}
+                onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
+                onTriggerDownload={handleTriggerDownload}
+              />
+            )}
+
+            {/* PAGE 3: DEDICATED LISENSI RESMI (OFFICIAL MICROSOFT) */}
+            {currentView === 'licensed' && (
+              <LicensedPage
+                launchers={LAUNCHERS}
+                onNavigate={handleNavigate}
+                onOpenDetail={(launcher) => setDetailLauncher(launcher)}
+                onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
+                onTriggerDownload={handleTriggerDownload}
+              />
+            )}
+
+            {/* PAGE 4: DEDICATED NON-LISENSI & ELY.BY */}
+            {currentView === 'non-licensed' && (
+              <NonLicensedPage
+                launchers={LAUNCHERS}
+                onNavigate={handleNavigate}
+                onOpenDetail={(launcher) => setDetailLauncher(launcher)}
+                onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
+                onTriggerDownload={handleTriggerDownload}
+              />
+            )}
+
+            {/* PAGE 5: DEDICATED ZONA BAHAYA & BLACKLIST */}
+            {currentView === 'dangerous' && (
+              <DangerousPage
+                launchers={LAUNCHERS}
+                onNavigate={handleNavigate}
+                onOpenDetail={(launcher) => setDetailLauncher(launcher)}
+                onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
+                onTriggerDownload={handleTriggerDownload}
+                onOpenSafetyChecklist={() => setIsSafetyChecklistOpen(true)}
+              />
+            )}
+
+            {/* PAGE 6: DEDICATED SERVER MINECRAFT INDONESIA */}
+            {currentView === 'servers' && (
+              <ServersPage
+                onNavigate={handleNavigate}
+                onOpenTour={() => setIsTourModalOpen(true)}
+              />
+            )}
+
+            {/* PAGE 7: MODS & ADDONS INTEGRATION (MODRINTH / CURSEFORGE) */}
+            {currentView === 'mods' && (
+              <ModsPage
+                onNavigate={handleNavigate}
+              />
+            )}
+
+            {/* PAGE 8: TENTANG SEMUA: APA ITU MINECRAFT & SISTEM LISENSI */}
+            {currentView === 'about' && (
+              <div className="space-y-8 pb-12">
+                <div className="border-b border-neutral-800 bg-neutral-900/50 py-10">
+                  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                      Ensiklopedia Komprehensif
+                    </span>
+                    <h1 className="text-3xl font-black text-white">
+                      Tentang Semua: Apa Itu Minecraft, Lisensi Resmi & Keamanan Launcher
+                    </h1>
+                    <p className="text-sm text-neutral-300 max-w-3xl">
+                      Pelajari seluk-beluk arsitektur Minecraft Java Edition, mengapa ada launcher yang butuh lisensi dan ada yang gratis via Ely.by, serta analisis mendalam bahaya software tidak resmi.
+                    </p>
+                  </div>
+                </div>
+
+                <LicenseGuideSection
+                  onSelectCategory={(cat) => {
+                    if (cat === 'licensed') handleNavigate('licensed');
+                    else if (cat === 'non-licensed') handleNavigate('non-licensed');
+                    else if (cat === 'dangerous') handleNavigate('dangerous');
+                    else handleNavigate('catalog');
+                  }}
+                />
+              </div>
+            )}
+
+            {/* PAGE 9: FULL COMPARISON TABLE */}
+            {currentView === 'comparison' && (
+              <div className="py-8">
+                <ComparisonTable
+                  onOpenDetails={(item) => setDetailLauncher(item)}
+                  onOpenInvestigation={(item) => setInvestigationLauncher(item)}
+                />
+              </div>
+            )}
+          </main>
+
+          {/* Footer with In-App Navigation */}
+          <Footer
+            onNavigate={handleNavigate}
+            onOpenSafetyGuide={() => setIsSafetyChecklistOpen(true)}
+            onOpenTour={() => setIsTourModalOpen(true)}
+          />
+        </div>
+      )}
+
+      {/* Android System Bar (Bottom Navigation & Gesture Bar) — Hidden inside standalone Live Chat */}
+      {currentView !== 'chat' && (
+        <AndroidSystemBar
           currentView={currentView}
-          onChangeView={handleNavigate}
-          onOpenSafetyGuide={() => setIsSafetyChecklistOpen(true)}
-          onOpenTour={() => setIsTourModalOpen(true)}
-          onOpenLogin={() => setIsLoginModalOpen(true)}
-          onOpenSettings={(tab) => handleOpenSettings(tab || 'appearance')}
-          user={currentUser}
-          onLogout={handleLogout}
-        />
-
-        {/* Main Content Area */}
-        <main className="flex-1 pb-20">
-          {/* User Account Bar if logged in */}
-          {currentUser && (
-            <div className="bg-neutral-900/60 border-b border-white/5 backdrop-blur-md px-4 py-2">
-              <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="text-neutral-400">Akun Aktif:</span>
-                  <button 
-                    onClick={() => handleOpenSettings('profile')}
-                    className="text-white font-semibold hover:text-emerald-400 hover:underline transition-colors flex items-center gap-1"
-                    title="Buka Pengaturan Profil"
-                  >
-                    <span>{currentUser.displayName}</span>
-                  </button>
-                  <span className="text-neutral-600">·</span>
-                  {currentUser.hasOfficialLicense && (
-                    <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
-                      <ShieldCheck className="h-3.5 w-3.5" />
-                      <span>Lisensi Resmi Mojang</span>
-                    </span>
-                  )}
-                  {currentUser.hasElyBySkin && (
-                    <span className="inline-flex items-center gap-1 text-sky-400 font-medium">
-                      <Sparkles className="h-3.5 w-3.5" />
-                      <span>Skin & Jubah Ely.by ({currentUser.skinCapeName})</span>
-                    </span>
-                  )}
-                </div>
-
-                <div className="text-neutral-400 flex items-center gap-2">
-                  <button
-                    onClick={() => handleOpenSettings('profile')}
-                    className="text-emerald-400 hover:underline flex items-center gap-1 font-medium"
-                  >
-                    <span>Edit Profil & Skin Avatar</span>
-                  </button>
-                  <span>·</span>
-                  <button
-                    onClick={() => setIsTourModalOpen(true)}
-                    className="text-neutral-300 hover:text-white flex items-center gap-1"
-                  >
-                    <Compass className="h-3 w-3" />
-                    <span>Panduan Tour</span>
-                  </button>
-                  <span>·</span>
-                  <button
-                    onClick={handleLogout}
-                    className="text-red-400 hover:underline"
-                  >
-                    Ganti Akun
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* PAGE 1: BERANDA UTAMA (HOME) */}
-          {currentView === 'home' && (
-            <HomePage
-              onNavigate={handleNavigate}
-              onOpenSafetyChecklist={() => setIsSafetyChecklistOpen(true)}
-              onOpenTour={() => setIsTourModalOpen(true)}
-              onOpenSettings={() => setIsSettingsOpen(true)}
-              onOpenPotatoModal={() => setIsPotatoModalOpen(true)}
-              onOpenCraftAi={() => setIsCraftAiOpen(true)}
-              onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
-              onOpenDetail={(launcher) => setDetailLauncher(launcher)}
-              sampleLaunchers={sampleLaunchers}
-            />
-          )}
-
-          {/* PAGE 2: KATALOG LENGKAP (ALL LAUNCHERS) */}
-          {currentView === 'catalog' && (
-            <CatalogPage
-              launchers={LAUNCHERS}
-              onNavigate={handleNavigate}
-              onOpenDetail={(launcher) => setDetailLauncher(launcher)}
-              onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
-              onTriggerDownload={handleTriggerDownload}
-            />
-          )}
-
-          {/* PAGE 3: DEDICATED LISENSI RESMI (OFFICIAL MICROSOFT) */}
-          {currentView === 'licensed' && (
-            <LicensedPage
-              launchers={LAUNCHERS}
-              onNavigate={handleNavigate}
-              onOpenDetail={(launcher) => setDetailLauncher(launcher)}
-              onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
-              onTriggerDownload={handleTriggerDownload}
-            />
-          )}
-
-          {/* PAGE 4: DEDICATED NON-LISENSI & ELY.BY */}
-          {currentView === 'non-licensed' && (
-            <NonLicensedPage
-              launchers={LAUNCHERS}
-              onNavigate={handleNavigate}
-              onOpenDetail={(launcher) => setDetailLauncher(launcher)}
-              onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
-              onTriggerDownload={handleTriggerDownload}
-            />
-          )}
-
-          {/* PAGE 5: DEDICATED ZONA BAHAYA & BLACKLIST */}
-          {currentView === 'dangerous' && (
-            <DangerousPage
-              launchers={LAUNCHERS}
-              onNavigate={handleNavigate}
-              onOpenDetail={(launcher) => setDetailLauncher(launcher)}
-              onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
-              onTriggerDownload={handleTriggerDownload}
-              onOpenSafetyChecklist={() => setIsSafetyChecklistOpen(true)}
-            />
-          )}
-
-          {/* PAGE 6: DEDICATED SERVER MINECRAFT INDONESIA */}
-          {currentView === 'servers' && (
-            <ServersPage
-              onNavigate={handleNavigate}
-              onOpenTour={() => setIsTourModalOpen(true)}
-            />
-          )}
-
-          {/* PAGE 7: MODS & ADDONS INTEGRATION (MODRINTH / CURSEFORGE) */}
-          {currentView === 'mods' && (
-            <ModsPage
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          {/* PAGE 6: TENTANG SEMUA: APA ITU MINECRAFT & SISTEM LISENSI */}
-          {currentView === 'about' && (
-            <div className="space-y-8 pb-12">
-              <div className="border-b border-neutral-800 bg-neutral-900/50 py-10">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                    Ensiklopedia Komprehensif
-                  </span>
-                  <h1 className="text-3xl font-black text-white">
-                    Tentang Semua: Apa Itu Minecraft, Lisensi Resmi & Keamanan Launcher
-                  </h1>
-                  <p className="text-sm text-neutral-300 max-w-3xl">
-                    Pelajari seluk-beluk arsitektur Minecraft Java Edition, mengapa ada launcher yang butuh lisensi dan ada yang gratis via Ely.by, serta analisis mendalam bahaya software tidak resmi.
-                  </p>
-                </div>
-              </div>
-
-              <LicenseGuideSection
-                onSelectCategory={(cat) => {
-                  if (cat === 'licensed') handleNavigate('licensed');
-                  else if (cat === 'non-licensed') handleNavigate('non-licensed');
-                  else if (cat === 'dangerous') handleNavigate('dangerous');
-                  else handleNavigate('catalog');
-                }}
-              />
-            </div>
-          )}
-
-          {/* PAGE 7: FULL COMPARISON TABLE */}
-          {currentView === 'comparison' && (
-            <div className="py-8">
-              <ComparisonTable
-                onOpenDetails={(item) => setDetailLauncher(item)}
-                onOpenInvestigation={(item) => setInvestigationLauncher(item)}
-              />
-            </div>
-          )}
-        </main>
-
-        {/* Footer with In-App Navigation */}
-        <Footer
           onNavigate={handleNavigate}
-          onOpenSafetyGuide={() => setIsSafetyChecklistOpen(true)}
-          onOpenTour={() => setIsTourModalOpen(true)}
+          onOpenSettings={() => handleOpenSettings('appearance')}
+          settings={settings}
         />
-      </div>
-
-      {/* Android System Bar (Bottom Navigation & Gesture Bar) */}
-      <AndroidSystemBar
-        currentView={currentView}
-        onNavigate={handleNavigate}
-        onOpenSettings={() => handleOpenSettings('appearance')}
-        settings={settings}
-      />
+      )}
 
       {/* Settings Modal (Pengaturan Latar Belakang, Profil & Blur XMCL) */}
       <SettingsModal
@@ -524,24 +655,26 @@ export default function App() {
         onClose={() => setIsCraftAiOpen(false)}
       />
 
-      {/* Floating Action Button (FAB) for Craft AI with custom uploaded image icon */}
-      <div className="fixed bottom-20 right-5 z-40">
-        <button
-          onClick={() => setIsCraftAiOpen(true)}
-          className="group relative flex items-center justify-center h-14 w-14 rounded-full bg-neutral-900 shadow-2xl shadow-emerald-950 hover:scale-110 active:scale-95 ring-4 ring-emerald-500/60 transition-all overflow-hidden"
-          title="Tanya Craft AI"
-        >
-          <img
-            src="/assets/aistudio/image_623e557a.png"
-            alt="Craft AI"
-            className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
-          />
-          <div className="absolute inset-0 bg-emerald-500/10 mix-blend-overlay pointer-events-none" />
-          <span className="absolute -top-8 bg-neutral-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-emerald-500/40">
-            Tanya Craft AI 🤖
-          </span>
-        </button>
-      </div>
+      {/* Floating Action Button (FAB) for Craft AI — Hidden inside standalone Live Chat so it doesn't cover Send button */}
+      {currentView !== 'chat' && (
+        <div className="fixed bottom-20 right-5 z-40">
+          <button
+            onClick={() => setIsCraftAiOpen(true)}
+            className="group relative flex items-center justify-center h-14 w-14 rounded-full bg-neutral-900 shadow-2xl shadow-emerald-950 hover:scale-110 active:scale-95 ring-4 ring-emerald-500/60 transition-all overflow-hidden"
+            title="Tanya Craft AI"
+          >
+            <img
+              src="/assets/aistudio/image_623e557a.png"
+              alt="Craft AI"
+              className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
+            <div className="absolute inset-0 bg-emerald-500/10 mix-blend-overlay pointer-events-none" />
+            <span className="absolute -top-8 bg-neutral-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-emerald-500/40">
+              Tanya Craft AI 🤖
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

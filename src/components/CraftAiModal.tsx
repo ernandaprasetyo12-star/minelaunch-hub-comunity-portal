@@ -1,21 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Sparkles, 
   X, 
   Send, 
-  Bot, 
   User, 
   Loader2, 
-  HelpCircle, 
-  Cpu, 
-  ShieldCheck, 
-  Minimize2, 
-  Maximize2 
+  ExternalLink,
+  Globe,
+  AlertCircle,
 } from 'lucide-react';
+
+interface GroundingSource {
+  title: string;
+  url: string;
+}
 
 interface Message {
   role: 'user' | 'model';
   text: string;
+  sources?: GroundingSource[];
+  isError?: boolean;
 }
 
 interface CraftAiModalProps {
@@ -27,7 +30,7 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'model',
-      text: 'Halo! Saya Craft AI, asisten virtual resmi MineLaunch Hub. Ada yang ingin kamu tanyakan seputar peluncur Minecraft, cara optimasi laptop kentang, atau tips menghindari malware?'
+      text: 'Halo! Saya Craft AI yang terintegrasi dengan Google Gemini & Google Search. Kamu bisa tanya apa saja secara luas: mulai dari Minecraft Java, launcher aman, mod Modrinth/CurseForge, server Indonesia, Redstone, coding, hardware PC, hingga pengetahuan umum!'
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
@@ -56,45 +59,49 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
     setIsLoading(true);
 
     try {
-      const history = messages.slice(-6); // Keep last 3 turns of context
+      const history = messages
+        .filter((m) => !m.isError)
+        .slice(-8)
+        .map((m) => ({ role: m.role, text: m.text }));
+
       const res = await fetch('/api/craft-ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMsg.text, history }),
       });
 
-      let data: any = null;
-      try {
-        data = await res.json();
-      } catch {
-        // Not JSON (e.g. static hosting 404 HTML fallback)
-      }
+      const contentType = res.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await res.json() : null;
 
       if (res.ok && data && data.reply) {
-        setMessages((prev) => [...prev, { role: 'model', text: data.reply }]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'model',
+            text: data.reply,
+            sources: Array.isArray(data.sources) ? data.sources : undefined,
+          },
+        ]);
       } else {
-        // Intelligent offline / static deployment fallback responses
-        const queryLower = text.toLowerCase();
-        let fallbackReply = "Halo! Craft AI merespons dalam mode Offline/Statis (backend Node.js tidak aktif di hosting ini). Untuk kebutuhan Minecraft, gunakan Prism Launcher (resmi) atau XMCL / SKLauncher (Ely.by) yang aman dari malware.";
-        
-        if (queryLower.includes('ringan') || queryLower.includes('kentang') || queryLower.includes('ram')) {
-          fallbackReply = "Untuk PC/laptop kentang (RAM 4GB), sangat disarankan menggunakan SKLauncher atau Feather Client dengan alokasi RAM 2GB serta menginstal mod Sodium (Fabric) untuk mendongkrak FPS secara drastis!";
-        } else if (queryLower.includes('tlauncher') || queryLower.includes('bahaya') || queryLower.includes('virus')) {
-          fallbackReply = "Waspada terhadap TLauncher (TLMedia)! Berdasarkan investigasi Wikipedia dan komunitas, launcher tersebut mencuri data sesi Minecraft dan membajak file hosts Windows. Gunakan alternatif bersih seperti XMCL atau SKLauncher.";
-        } else if (queryLower.includes('ely') || queryLower.includes('skin')) {
-          fallbackReply = "Akun Ely.by adalah solusi terbaik untuk bermain Minecraft non-lisensi dengan dukungan skin kustom, jubah (cape), dan sistem otorisasi yang aman tanpa risiko spyware.";
-        }
-
-        setMessages((prev) => [...prev, { role: 'model', text: fallbackReply }]);
+        const errorDetail = data?.details || data?.error || `Server merespons status ${res.status}`;
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'model',
+            isError: true,
+            text: `Maaf, gagal terhubung ke Google Gemini saat ini (${errorDetail}). Pastikan server Node.js & GEMINI_API_KEY aktif, lalu coba lagi.`,
+          },
+        ]);
       }
-    } catch (err) {
-      // Graceful offline fallback
-      const fallbackReplies = [
-        "Halo! Mode Craft AI Offline aktif. Pastikan Anda mengunduh launcher resmi seperti Prism Launcher atau XMCL untuk keamanan maksimal.",
-        "Untuk laptop kentang, gunakan SKLauncher dengan mod Sodium agar game berjalan sangat mulus."
-      ];
-      const reply = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
-      setMessages((prev) => [...prev, { role: 'model', text: reply }]);
+    } catch (err: any) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'model',
+          isError: true,
+          text: `Koneksi ke server Craft AI terputus (${err?.message || 'Network error'}). Silakan periksa koneksi internet dan coba lagi.`,
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +110,7 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-2xl rounded-3xl border border-emerald-500/30 bg-neutral-900/95 shadow-2xl backdrop-blur-2xl flex flex-col h-[85vh] sm:h-[80vh] overflow-hidden"
+        className="relative w-full max-w-2xl rounded-3xl border border-emerald-500/30 bg-neutral-900/95 shadow-2xl backdrop-blur-2xl flex flex-col h-[85vh] sm:h-[82vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -113,14 +120,15 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
               <img src="/assets/aistudio/image_623e557a.png" alt="Craft AI" className="h-full w-full object-cover" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2 flex-wrap">
                 <span>Craft AI Assistant</span>
                 <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800 font-mono">
-                  Gemini 2.5 Flash
+                  Google Gemini AI
                 </span>
               </h2>
-              <p className="text-xs text-neutral-400">
-                Tanya apa saja tentang Minecraft, mod, optimasi, & keamanan launcher
+              <p className="text-xs text-neutral-400 flex items-center gap-1.5">
+                <Globe className="h-3 w-3 text-sky-400" />
+                <span>Pengetahuan Luas + Google Search Grounding</span>
               </p>
             </div>
           </div>
@@ -133,14 +141,15 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
           </button>
         </div>
 
-        {/* Quick Suggestion Chips */}
+        {/* Broad Quick Suggestion Chips */}
         <div className="bg-neutral-950/50 border-b border-neutral-800/60 px-4 py-2.5 flex items-center gap-2 overflow-x-auto shrink-0 text-xs">
-          <span className="text-neutral-500 font-medium shrink-0">Contoh Tanya:</span>
+          <span className="text-neutral-500 font-medium shrink-0">Topik Luas:</span>
           {[
-            'Launcher apa yang paling ringan untuk laptop RAM 4GB?',
-            'Apa bedanya TLauncher asli dan palsu (TLMedia)?',
-            'Bagaimana cara pasang skin Ely.by di XMCL?',
-            'Rekomendasi modpack ringan untuk survival'
+            'Launcher paling ringan untuk laptop RAM 4GB?',
+            'Cara pasang modpack Fabric Sodium + Iris di XMCL',
+            'Info fitur terbaru Minecraft Java & Server Kaizen Network',
+            'Tips rakit PC gaming & optimasi Java untuk coding',
+            'Cara baca crash log Minecraft Exit Code 1',
           ].map((suggestion, idx) => (
             <button
               key={idx}
@@ -176,13 +185,41 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
               </div>
 
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm ${
+                className={`max-w-[82%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed shadow-sm space-y-2.5 ${
                   msg.role === 'user'
                     ? 'bg-emerald-600 text-white rounded-tr-none'
+                    : msg.isError
+                    ? 'bg-red-950/60 border border-red-700/80 text-red-200 rounded-tl-none'
                     : 'bg-neutral-800/90 border border-neutral-700/80 text-neutral-200 rounded-tl-none'
                 }`}
               >
-                {msg.text}
+                <div className="whitespace-pre-wrap break-words flex items-start gap-2">
+                  {msg.isError && <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />}
+                  <span>{msg.text}</span>
+                </div>
+
+                {msg.sources && msg.sources.length > 0 && (
+                  <div className="pt-2 border-t border-neutral-700/70 space-y-1.5">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1">
+                      <Globe className="h-3 w-3" />
+                      <span>Sumber Google Search:</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {msg.sources.slice(0, 4).map((src, sIdx) => (
+                        <a
+                          key={sIdx}
+                          href={src.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-lg bg-neutral-900/90 border border-neutral-700 hover:border-sky-500 px-2 py-1 text-[10px] text-sky-300 hover:text-sky-200 transition-colors max-w-[220px]"
+                        >
+                          <span className="truncate">{src.title}</span>
+                          <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -194,7 +231,7 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
               </div>
               <div className="rounded-2xl rounded-tl-none bg-neutral-800/90 border border-neutral-700 px-4 py-3 text-xs text-neutral-400 flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
-                <span>Craft AI sedang meracik jawaban...</span>
+                <span>Craft AI (Google Gemini) sedang berpikir &amp; mencari referensi...</span>
               </div>
             </div>
           )}
@@ -215,7 +252,7 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Tanyakan soal launcher, spesifikasi, atau tips game..."
+              placeholder="Tanya apa saja: Minecraft, mod, server Indo, coding, hardware, atau umum..."
               className="flex-1 rounded-2xl border border-neutral-800 bg-neutral-900 px-4 py-3 text-xs sm:text-sm text-white placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
             />
             <button
@@ -227,7 +264,7 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
             </button>
           </form>
           <div className="text-[10px] text-neutral-500 text-center mt-2">
-            Craft AI didukung oleh Google Gemini. Selalu verifikasi rekomendasi keamanan.
+            Craft AI terintegrasi langsung dengan Google Gemini &amp; Google Search Grounding.
           </div>
         </div>
       </div>
