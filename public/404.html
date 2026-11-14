@@ -1,27 +1,41 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MineLaunch Hub - Mengalihkan...</title>
+    <style>
+      html, body {
+        background-color: #0a0a0a;
+        color: #f5f5f5;
+        font-family: system-ui, -apple-system, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 24px;
+      }
+      a { color: #34d399; font-weight: 700; text-decoration: none; }
+    </style>
     <script>
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
-      var pathSegmentsToKeep = 0;
-
-      var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
+      (function () {
+        var path = window.location.pathname;
+        var parts = path.split('/').filter(Boolean);
+        // On github.io/<repo>/..., keep the repository segment if present
+        var target = '/';
+        if (window.location.hostname.endsWith('github.io') && parts.length >= 1) {
+          target = '/' + parts[0] + '/';
+        }
+        window.location.replace(target + (window.location.hash || ''));
+      })();
     </script>
   </head>
   <body>
-    <p style="text-align:center; padding: 40px; font-family: sans-serif; color: #888;">
-      Mengalihkan ke MineLaunch Hub...
-    </p>
+    <div>
+      <p>Mengalihkan ke beranda MineLaunch Hub...</p>
+      <p><a href="./">Klik di sini jika tidak otomatis dialihkan</a></p>
+    </div>
   </body>
 </html>

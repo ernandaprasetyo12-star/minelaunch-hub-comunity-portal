@@ -13,10 +13,44 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      html, body {
+        background-color: #0a0a0a;
+        color: #f5f5f5;
+        margin: 0;
+        min-height: 100vh;
+      }
+    </style>
   </head>
   <body class="bg-neutral-950 text-neutral-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-300">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      (function () {
+        var bootErrors = [];
+        window.addEventListener('error', function (ev) {
+          if (ev && ev.message) bootErrors.push(ev.message);
+        });
+        window.addEventListener('unhandledrejection', function (ev) {
+          if (ev && ev.reason) bootErrors.push(String(ev.reason && ev.reason.message ? ev.reason.message : ev.reason));
+        });
+        setTimeout(function () {
+          var root = document.getElementById('root');
+          if (!root || root.childElementCount > 0) return;
+          var hasRawTsx = !!document.querySelector('script[src*="/src/main.tsx"]');
+          var msg = hasRawTsx
+            ? 'GitHub Pages saat ini menayangkan file sumber mentah (index.html sebelum build). Buka Repo → Settings → Pages → Source lalu pilih "GitHub Actions" agar hasil build (dist/) aktif.'
+            : 'Aplikasi gagal dimuat di browser (' + (bootErrors[0] || 'Script bundle gagal dimuat atau diblokir') + ').';
+          root.innerHTML =
+            '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;font-family:system-ui,sans-serif;background:#0a0a0a;color:#f5f5f5;">' +
+            '  <div style="max-width:460px;width:100%;background:#171717;border:1px solid #3f3f46;border-radius:16px;padding:24px;box-sizing:border-box;">' +
+            '    <h1 style="margin:0 0 10px;font-size:18px;color:#34d399;">MineLaunch Hub — Diagnostik Pemuatan</h1>' +
+            '    <p style="margin:0 0 16px;font-size:13px;line-height:1.6;color:#d4d4d8;">' + msg + '</p>' +
+            '    <button onclick="window.location.reload()" style="background:#059669;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;">Muat Ulang Halaman</button>' +
+            '  </div>' +
+            '</div>';
+        }, 3500);
+      })();
+    </script>
   </body>
 </html>
-

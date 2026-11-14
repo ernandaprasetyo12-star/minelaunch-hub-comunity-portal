@@ -25,15 +25,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Build production bundle
         run: npm run build
 
-      - name: Copy 404.html fallback & ensure .nojekyll
+      - name: Ensure .nojekyll and SPA 404 fallback
         run: |
           cp dist/index.html dist/404.html
           touch dist/.nojekyll
