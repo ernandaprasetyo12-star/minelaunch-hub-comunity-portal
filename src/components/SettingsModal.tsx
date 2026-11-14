@@ -18,13 +18,25 @@ import {
   User,
   Save,
   Shield,
-  Crown
+  Crown,
+  Globe,
+  ExternalLink,
+  RefreshCw,
+  Loader2,
+  Copy,
+  KeyRound
 } from 'lucide-react';
 import { AppSettings, WALLPAPER_PRESETS } from '../types/settings';
 import { UserProfile } from '../types/auth';
 import { SkinAvatarSelector } from './SkinAvatarSelector';
 import { SafeImage } from './SafeImage';
 import { syncProfileToFirestore } from '../lib/firebase';
+import {
+  startElyByOAuthPopup,
+  refreshElyBySsoSession,
+  logoutElyBySso,
+  ElyBySetupInfo,
+} from '../lib/elybyOAuth';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -58,6 +70,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [profileHasOfficial, setProfileHasOfficial] = useState(user?.hasOfficialLicense ?? true);
   const [profileHasElyBy, setProfileHasElyBy] = useState(user?.hasElyBySkin ?? true);
   const [profileSaved, setProfileSaved] = useState(false);
+  const [elyBySsoLoading, setElyBySsoLoading] = useState(false);
+  const [elyBySsoError, setElyBySsoError] = useState<string | null>(null);
+  const [elyBySetupInfo, setElyBySetupInfo] = useState<ElyBySetupInfo | null>(null);
+  const [copiedCallback, setCopiedCallback] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -511,6 +527,193 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Ely.by OAuth2 SSO Integration Card */}
+                <div className="rounded-2xl border border-sky-800/70 bg-sky-950/25 p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-sky-400" />
+                      <span className="text-xs font-bold text-white">
+                        Koneksi SSO &amp; Otorisasi Ely.by (ely.by)
+                      </span>
+                    </div>
+                    {user?.elybySsoVerified ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-950 border border-emerald-700 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300">
+                        <CheckCircle2 className="h-3 w-3" />
+                        <span>SSO Aktif</span>
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-neutral-400">Belum terhubung OAuth</span>
+                    )}
+                  </div>
+
+                  {user?.elybySsoVerified ? (
+                    <div className="space-y-2.5 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                        <div className="rounded-xl border border-neutral-800 bg-neutral-950/80 px-3 py-2">
+                          <span className="text-neutral-400 block">Minecraft UUID Ely.by:</span>
+                          <span className="font-mono text-sky-300 break-all">{user.elybyUuid || '-'}</span>
+                        </div>
+                        <div className="rounded-xl border border-neutral-800 bg-neutral-950/80 px-3 py-2">
+                          <span className="text-neutral-400 block">Profil Publik Ely.by:</span>
+                          {user.elybyProfileLink ? (
+                            <a
+                              href={user.elybyProfileLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sky-300 hover:underline inline-flex items-center gap-1 font-medium"
+                            >
+                              <span>{user.elybyProfileLink}</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ) : (
+                            <span className="text-neutral-500">-</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={elyBySsoLoading}
+                          onClick={async () => {
+                            setElyBySsoLoading(true);
+                            setElyBySsoError(null);
+                            const refreshed = await refreshElyBySsoSession();
+                            setElyBySsoLoading(false);
+                            if (refreshed?.authenticated && onUpdateUser && user) {
+                              onUpdateUser({
+                                ...user,
+                                ssoExpiresAt: refreshed.expiresAt,
+                                elybySsoVerified: true,
+                              });
+                            } else {
+                              setElyBySsoError('Tidak dapat memperbarui token SSO. Silakan otorisasi ulang.');
+                            }
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-sky-700 bg-sky-950/70 hover:bg-sky-900/70 px-3 py-1.5 text-[11px] font-bold text-sky-200 transition-colors"
+                        >
+                          <RefreshCw className={`h-3.5 w-3.5 ${elyBySsoLoading ? 'animate-spin' : ''}`} />
+                          <span>Perbarui Token SSO</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await logoutElyBySso();
+                            if (onUpdateUser && user) {
+                              onUpdateUser({
+                                ...user,
+                                elybySsoVerified: false,
+                                elybyUuid: undefined,
+                                elybyProfileLink: undefined,
+                                ssoExpiresAt: undefined,
+                              });
+                            }
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-700 bg-neutral-900 hover:border-red-500/60 hover:text-red-300 px-3 py-1.5 text-[11px] font-semibold text-neutral-300 transition-colors"
+                        >
+                          <span>Putuskan Sesi SSO</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      <p className="text-[11px] text-neutral-300 leading-relaxed">
+                        Hubungkan akun Anda ke <a href="https://www.ely.by" target="_blank" rel="noopener noreferrer" className="text-sky-400 underline">ely.by</a> lewat OAuth 2.0 untuk memperoleh sesi SSO, UUID, dan sinkronisasi skin resmi.
+                      </p>
+                      <button
+                        type="button"
+                        disabled={elyBySsoLoading}
+                        onClick={async () => {
+                          setElyBySsoLoading(true);
+                          setElyBySsoError(null);
+                          setElyBySetupInfo(null);
+                          try {
+                            await startElyByOAuthPopup({
+                              onSuccess: (ssoProfile) => {
+                                setElyBySsoLoading(false);
+                                if (onUpdateUser) {
+                                  const merged: UserProfile = user
+                                    ? {
+                                        ...user,
+                                        hasElyBySkin: true,
+                                        skinCapeName: ssoProfile.skinCapeName,
+                                        elybyUuid: ssoProfile.elybyUuid,
+                                        elybyProfileLink: ssoProfile.elybyProfileLink,
+                                        elybySsoVerified: true,
+                                        ssoExpiresAt: ssoProfile.ssoExpiresAt,
+                                        avatarUrl:
+                                          user.provider === 'google' ? user.avatarUrl : ssoProfile.avatarUrl,
+                                      }
+                                    : ssoProfile;
+                                  onUpdateUser(merged);
+                                  setProfileHasElyBy(true);
+                                  void syncProfileToFirestore(merged).catch(console.error);
+                                }
+                              },
+                              onNeedsSetup: (info) => {
+                                setElyBySsoLoading(false);
+                                setElyBySetupInfo(info);
+                              },
+                              onError: (msg) => {
+                                setElyBySsoLoading(false);
+                                setElyBySsoError(msg);
+                              },
+                              onCancel: () => setElyBySsoLoading(false),
+                            });
+                          } catch (err: any) {
+                            setElyBySsoLoading(false);
+                            setElyBySsoError(err?.message || 'Gagal menghubungi server OAuth Ely.by.');
+                          }
+                        }}
+                        className="inline-flex items-center gap-2 rounded-xl bg-sky-600 hover:bg-sky-500 px-4 py-2 text-xs font-bold text-white transition-colors disabled:opacity-60"
+                      >
+                        {elyBySsoLoading ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <KeyRound className="h-3.5 w-3.5" />
+                        )}
+                        <span>{elyBySsoLoading ? 'Menghubungkan Ely.by...' : 'Otorisasi SSO ke Ely.by'}</span>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </button>
+
+                      {elyBySetupInfo && (
+                        <div className="rounded-xl border border-amber-700/70 bg-neutral-950/90 p-3 space-y-2 text-[11px] text-neutral-300">
+                          <div className="font-bold text-amber-300">
+                            Kredensial OAuth Ely.by Belum Diatur:
+                          </div>
+                          <p>
+                            Tambahkan <code className="text-amber-300">ELYBY_CLIENT_ID</code> &amp; <code className="text-amber-300">ELYBY_CLIENT_SECRET</code> di AI Studio Secrets setelah membuat aplikasi di{' '}
+                            <a href={elyBySetupInfo.portalUrl} target="_blank" rel="noopener noreferrer" className="text-sky-400 underline">
+                              account.ely.by/dev/applications
+                            </a>{' '}
+                            dengan Callback URL:
+                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <code className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-2 py-1 text-[10px] text-sky-300 truncate select-all">
+                              {elyBySetupInfo.redirectUri}
+                            </code>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(elyBySetupInfo.redirectUri);
+                                setCopiedCallback(true);
+                                setTimeout(() => setCopiedCallback(false), 2000);
+                              }}
+                              className="rounded-lg bg-neutral-800 hover:bg-neutral-700 px-2.5 py-1 text-[10px] font-bold text-white flex items-center gap-1 shrink-0"
+                            >
+                              {copiedCallback ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                              <span>{copiedCallback ? 'Disalin' : 'Salin'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {elyBySsoError && (
+                    <div className="text-[11px] text-red-400">{elyBySsoError}</div>
+                  )}
                 </div>
 
                 {/* Save Profile Button */}

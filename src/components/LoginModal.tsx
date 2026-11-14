@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { UserProfile, AuthProvider } from '../types/auth';
 import { 
   X, ShieldCheck, Sparkles, User, 
-  ArrowRight, KeyRound, Globe, AlertCircle, Loader2 
+  ArrowRight, KeyRound, Globe, AlertCircle, Loader2, ExternalLink, Copy, Check
 } from 'lucide-react';
 import { SkinAvatarSelector } from './SkinAvatarSelector';
 import { signInWithGoogleFirebase } from '../lib/firebase';
+import { startElyByOAuthPopup, ElyBySetupInfo } from '../lib/elybyOAuth';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -23,12 +24,49 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [selectedProvider, setSelectedProvider] = useState<AuthProvider | null>(initialProvider || null);
   const [customUsername, setCustomUsername] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isElyBySsoLoading, setIsElyBySsoLoading] = useState(false);
+  const [elyBySetupInfo, setElyBySetupInfo] = useState<ElyBySetupInfo | null>(null);
+  const [copiedCallback, setCopiedCallback] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
   // Avatar state
   const [selectedAvatarUrl, setSelectedAvatarUrl] = useState('https://mc-heads.net/avatar/MHF_Steve/100');
 
   if (!isOpen) return null;
+
+  const handleStartElyBySso = async () => {
+    setIsElyBySsoLoading(true);
+    setAuthError(null);
+    setElyBySetupInfo(null);
+    try {
+      await startElyByOAuthPopup({
+        avatarOverride:
+          selectedAvatarUrl !== 'https://mc-heads.net/avatar/MHF_Steve/100' &&
+          selectedAvatarUrl !== 'https://mc-heads.net/avatar/Steve/100'
+            ? selectedAvatarUrl
+            : undefined,
+        onSuccess: (profile) => {
+          setIsElyBySsoLoading(false);
+          onLoginSuccess(profile);
+          onClose();
+        },
+        onNeedsSetup: (info) => {
+          setIsElyBySsoLoading(false);
+          setElyBySetupInfo(info);
+        },
+        onError: (msg) => {
+          setIsElyBySsoLoading(false);
+          setAuthError(msg);
+        },
+        onCancel: () => {
+          setIsElyBySsoLoading(false);
+        },
+      });
+    } catch (err: any) {
+      setIsElyBySsoLoading(false);
+      setAuthError(err?.message || 'Gagal memulai otorisasi SSO Ely.by.');
+    }
+  };
 
   const handleSelectGoogle = async () => {
     setIsSubmitting(true);
@@ -290,14 +328,73 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
 
               {selectedProvider === 'elyby' && (
-                <div className="rounded-xl border border-sky-800/80 bg-sky-950/40 p-3 space-y-1">
-                  <div className="flex items-center gap-2 text-xs font-bold text-sky-300">
-                    <Globe className="h-3.5 w-3.5 text-sky-400 shrink-0" />
-                    <span>Layanan Skin &amp; Jubah Ely.by</span>
+                <div className="rounded-xl border border-sky-700/80 bg-sky-950/40 p-3.5 space-y-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs font-bold text-sky-300">
+                      <Globe className="h-3.5 w-3.5 text-sky-400 shrink-0" />
+                      <span>Otorisasi SSO Resmi ke Ely.by (account.ely.by)</span>
+                    </div>
+                    <p className="text-[11px] text-sky-200/80 leading-relaxed">
+                      Masuk via OAuth 2.0 Ely.by untuk mendapatkan sesi SSO, UUID resmi, profil <code className="text-sky-300">ely.by</code>, dan sinkronisasi skin otomatis.
+                    </p>
                   </div>
-                  <p className="text-[11px] text-sky-200/80 leading-relaxed">
-                    Masukkan username akun Ely.by Anda. Skin Anda otomatis ditampilkan di bawah.
-                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleStartElyBySso}
+                    disabled={isElyBySsoLoading}
+                    className="w-full rounded-xl bg-sky-600 hover:bg-sky-500 px-4 py-2.5 text-xs font-bold text-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-sky-950 disabled:opacity-60"
+                  >
+                    {isElyBySsoLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <KeyRound className="h-4 w-4" />
+                    )}
+                    <span>{isElyBySsoLoading ? 'Menunggu Otorisasi Ely.by...' : 'Otorisasi Sekarang dengan SSO Ely.by'}</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </button>
+
+                  {elyBySetupInfo && (
+                    <div className="rounded-xl border border-amber-700/70 bg-neutral-950/90 p-3 space-y-2 text-[11px] text-neutral-300">
+                      <div className="font-bold text-amber-300">
+                        Konfigurasi OAuth App Ely.by Diperlukan:
+                      </div>
+                      <p className="leading-relaxed">
+                        Daftarkan aplikasi di{' '}
+                        <a
+                          href={elyBySetupInfo.portalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sky-400 underline font-semibold"
+                        >
+                          Portal Developer Ely.by
+                        </a>{' '}
+                        dan set <code className="text-amber-300">ELYBY_CLIENT_ID</code> &amp;{' '}
+                        <code className="text-amber-300">ELYBY_CLIENT_SECRET</code> di Secrets dengan Callback URL:
+                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <code className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-2 py-1.5 text-[10px] text-sky-300 truncate select-all">
+                          {elyBySetupInfo.redirectUri}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(elyBySetupInfo.redirectUri);
+                            setCopiedCallback(true);
+                            setTimeout(() => setCopiedCallback(false), 2000);
+                          }}
+                          className="rounded-lg bg-neutral-800 hover:bg-neutral-700 px-2.5 py-1.5 text-[10px] font-bold text-white flex items-center gap-1 shrink-0"
+                        >
+                          {copiedCallback ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                          <span>{copiedCallback ? 'Disalin' : 'Salin'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-[10px] text-neutral-400 text-center border-t border-sky-900/50 pt-2">
+                    Atau gunakan input username lokal di bawah untuk pratinjau skin:
+                  </div>
                 </div>
               )}
 

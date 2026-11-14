@@ -14,5 +14,9 @@ export interface UserProfile {
   hasOfficialLicense: boolean;
   hasElyBySkin: boolean;
   skinCapeName?: string;
+  elybyUuid?: string;
+  elybyProfileLink?: string;
+  elybySsoVerified?: boolean;
+  ssoExpiresAt?: number;
   joinedAt: string;
 }

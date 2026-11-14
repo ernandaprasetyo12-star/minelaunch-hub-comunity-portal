@@ -1,5 +1,6 @@
 import express from 'express';
 import http from 'http';
+import crypto from 'crypto';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
@@ -11,6 +12,359 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+// ---------------------------------------------------------------------------
+// Ely.by OAuth2 & SSO Session Management
+// ---------------------------------------------------------------------------
+const ELYBY_AUTHORIZE_URL = 'https://account.ely.by/oauth2/v1';
+const ELYBY_TOKEN_URL = 'https://account.ely.by/api/oauth2/v1/token';
+const ELYBY_ACCOUNT_INFO_URL = 'https://account.ely.by/api/account/v1/info';
+const ELYBY_CALLBACK_PATH = '/api/auth/elyby/callback';
+const ELYBY_COOKIE_NAME = 'elyby_sso_sid';
+
+interface ElyBySsoSession {
+  sid: string;
+  accessToken: string;
+  refreshToken?: string;
+  expiresAt: number;
+  user: {
+    id: number;
+    uuid: string;
+    username: string;
+    email?: string;
+    profileLink: string;
+    preferredLanguage?: string;
+  };
+}
+
+// In-memory SSO state & session stores
+const pendingOAuthStates = new Map<string, number>();
+const elybySsoSessions = new Map<string, ElyBySsoSession>();
+
+function getAppBaseUrl(): string {
+  const raw = process.env.APP_URL || 'http://localhost:3000';
+  return raw.replace(/\/+$/, '');
+}
+
+function getElyByRedirectUri(): string {
+  return `${getAppBaseUrl()}${ELYBY_CALLBACK_PATH}`;
+}
+
+function parseCookies(cookieHeader?: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (!cookieHeader) return result;
+  for (const part of cookieHeader.split(';')) {
+    const idx = part.indexOf('=');
+    if (idx === -1) continue;
+    const key = part.slice(0, idx).trim();
+    const val = part.slice(idx + 1).trim();
+    if (key) result[key] = decodeURIComponent(val);
+  }
+  return result;
+}
+
+function setSsoCookie(res: express.Response, sid: string) {
+  res.cookie(ELYBY_COOKIE_NAME, sid, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/',
+  });
+}
+
+// 1. Get Ely.by OAuth2 Authorization URL
+app.get('/api/auth/elyby/url', (_req, res) => {
+  const clientId = process.env.ELYBY_CLIENT_ID?.trim();
+  const clientSecret = process.env.ELYBY_CLIENT_SECRET?.trim();
+  const redirectUri = getElyByRedirectUri();
+
+  if (!clientId || !clientSecret) {
+    return res.json({
+      configured: false,
+      redirectUri,
+      portalUrl: 'https://account.ely.by/dev/applications',
+      message: 'ELYBY_CLIENT_ID dan ELYBY_CLIENT_SECRET belum diatur di AI Studio Secrets.',
+    });
+  }
+
+  const state = crypto.randomBytes(24).toString('hex');
+  pendingOAuthStates.set(state, Date.now() + 10 * 60 * 1000);
+
+  // Clean expired states
+  const now = Date.now();
+  for (const [k, exp] of pendingOAuthStates.entries()) {
+    if (exp < now) pendingOAuthStates.delete(k);
+  }
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: 'account_info account_email offline_access',
+    state,
+  });
+
+  return res.json({
+    configured: true,
+    url: `${ELYBY_AUTHORIZE_URL}?${params.toString()}`,
+    redirectUri,
+  });
+});
+
+// 2. OAuth2 Callback Handler (supports trailing slash variations)
+const elybyCallbackHandler = async (req: express.Request, res: express.Response) => {
+  const { code, state, error, error_description } = req.query;
+
+  const renderPopupResult = (payload: Record<string, any>, heading: string, bodyText: string) => {
+    const safeJson = JSON.stringify(payload).replace(/</g, '\\u003c');
+    return res.send(`<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <title>Otorisasi Ely.by - MineLaunch Hub</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0a0a0a; color: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; text-align: center; }
+    .card { max-width: 420px; border: 1px solid #262626; background: #171717; border-radius: 16px; padding: 24px; }
+    h1 { font-size: 18px; margin: 0 0 8px; color: #38bdf8; }
+    p { font-size: 13px; color: #d4d4d4; line-height: 1.5; margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>${heading}</h1>
+    <p>${bodyText}</p>
+  </div>
+  <script>
+    (function () {
+      var data = ${safeJson};
+      if (window.opener) {
+        window.opener.postMessage(data, '*');
+        setTimeout(function () { window.close(); }, 600);
+      } else {
+        window.location.href = '/';
+      }
+    })();
+  </script>
+</body>
+</html>`);
+  };
+
+  if (error) {
+    return renderPopupResult(
+      {
+        type: 'ELYBY_OAUTH_ERROR',
+        error: String(error_description || error),
+      },
+      'Otorisasi Dibatalkan',
+      'Otorisasi akun Ely.by dibatalkan atau ditolak. Jendela ini akan tertutup otomatis.'
+    );
+  }
+
+  if (!code || typeof code !== 'string') {
+    return renderPopupResult(
+      { type: 'ELYBY_OAUTH_ERROR', error: 'Kode otorisasi tidak ditemukan.' },
+      'Kode Otorisasi Hilang',
+      'Parameter code dari Ely.by tidak valid.'
+    );
+  }
+
+  if (!state || typeof state !== 'string' || !pendingOAuthStates.has(state)) {
+    return renderPopupResult(
+      { type: 'ELYBY_OAUTH_ERROR', error: 'State keamanan OAuth tidak valid atau kedaluwarsa.' },
+      'Sesi OAuth Kedaluwarsa',
+      'Silakan tutup jendela ini dan ulangi login Ely.by.'
+    );
+  }
+  pendingOAuthStates.delete(state);
+
+  const clientId = process.env.ELYBY_CLIENT_ID?.trim();
+  const clientSecret = process.env.ELYBY_CLIENT_SECRET?.trim();
+  if (!clientId || !clientSecret) {
+    return renderPopupResult(
+      { type: 'ELYBY_OAUTH_ERROR', error: 'ELYBY_CLIENT_ID / ELYBY_CLIENT_SECRET belum diset.' },
+      'Konfigurasi Belum Lengkap',
+      'Server belum memiliki kredensial OAuth Ely.by.'
+    );
+  }
+
+  try {
+    const tokenParams = new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: getElyByRedirectUri(),
+      grant_type: 'authorization_code',
+      code,
+    });
+
+    const tokenResp = await fetch(ELYBY_TOKEN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json',
+      },
+      body: tokenParams.toString(),
+    });
+
+    const tokenData: any = await tokenResp.json();
+    if (!tokenResp.ok || !tokenData?.access_token) {
+      throw new Error(tokenData?.error_description || tokenData?.error || 'Gagal menukar kode OAuth Ely.by');
+    }
+
+    const accountResp = await fetch(ELYBY_ACCOUNT_INFO_URL, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`,
+        Accept: 'application/json',
+      },
+    });
+
+    const accountData: any = await accountResp.json();
+    if (!accountResp.ok || !accountData?.username) {
+      throw new Error(accountData?.message || 'Gagal mengambil profil akun Ely.by');
+    }
+
+    const sid = crypto.randomBytes(32).toString('hex');
+    const expiresInSec = Number(tokenData.expires_in) || 86400;
+    const expiresAt = Date.now() + expiresInSec * 1000;
+
+    const session: ElyBySsoSession = {
+      sid,
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token,
+      expiresAt,
+      user: {
+        id: Number(accountData.id),
+        uuid: String(accountData.uuid || ''),
+        username: String(accountData.username),
+        email: accountData.email ? String(accountData.email) : undefined,
+        profileLink: String(accountData.profileLink || `https://ely.by/u${accountData.id}`),
+        preferredLanguage: accountData.preferredLanguage ? String(accountData.preferredLanguage) : undefined,
+      },
+    };
+
+    elybySsoSessions.set(sid, session);
+    setSsoCookie(res, sid);
+
+    return renderPopupResult(
+      {
+        type: 'ELYBY_OAUTH_SUCCESS',
+        sso: {
+          authenticated: true,
+          expiresAt,
+          user: session.user,
+        },
+      },
+      'Otorisasi Ely.by Berhasil!',
+      `Akun ${session.user.username} berhasil terhubung dengan SSO Ely.by. Jendela ini akan tertutup otomatis.`
+    );
+  } catch (err: any) {
+    console.error('Ely.by OAuth callback error:', err);
+    return renderPopupResult(
+      {
+        type: 'ELYBY_OAUTH_ERROR',
+        error: err?.message || 'Terjadi kesalahan saat otorisasi Ely.by.',
+      },
+      'Gagal Otorisasi Ely.by',
+      String(err?.message || 'Terjadi kesalahan pada server.')
+    );
+  }
+};
+
+app.get([ELYBY_CALLBACK_PATH, `${ELYBY_CALLBACK_PATH}/`], elybyCallbackHandler);
+
+// 3. Check Active Ely.by SSO Session
+app.get('/api/auth/elyby/session', (req, res) => {
+  const cookies = parseCookies(req.headers.cookie);
+  const sid = cookies[ELYBY_COOKIE_NAME];
+  if (!sid) {
+    return res.json({ authenticated: false });
+  }
+  const session = elybySsoSessions.get(sid);
+  if (!session) {
+    return res.json({ authenticated: false });
+  }
+  if (session.expiresAt < Date.now() && !session.refreshToken) {
+    elybySsoSessions.delete(sid);
+    return res.json({ authenticated: false, expired: true });
+  }
+  return res.json({
+    authenticated: true,
+    expiresAt: session.expiresAt,
+    hasRefreshToken: Boolean(session.refreshToken),
+    user: session.user,
+  });
+});
+
+// 4. Refresh Ely.by SSO Access Token using offline_access refresh_token
+app.post('/api/auth/elyby/refresh', async (req, res) => {
+  const cookies = parseCookies(req.headers.cookie);
+  const sid = cookies[ELYBY_COOKIE_NAME];
+  if (!sid) {
+    return res.status(401).json({ error: 'Sesi SSO Ely.by tidak ditemukan.' });
+  }
+  const session = elybySsoSessions.get(sid);
+  if (!session || !session.refreshToken) {
+    return res.status(401).json({ error: 'Refresh token SSO Ely.by tidak tersedia.' });
+  }
+
+  const clientId = process.env.ELYBY_CLIENT_ID?.trim();
+  const clientSecret = process.env.ELYBY_CLIENT_SECRET?.trim();
+  if (!clientId || !clientSecret) {
+    return res.status(503).json({ error: 'ELYBY_CLIENT_ID / ELYBY_CLIENT_SECRET belum diset.' });
+  }
+
+  try {
+    const params = new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'refresh_token',
+      refresh_token: session.refreshToken,
+    });
+
+    const tokenResp = await fetch(ELYBY_TOKEN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json',
+      },
+      body: params.toString(),
+    });
+    const tokenData: any = await tokenResp.json();
+    if (!tokenResp.ok || !tokenData?.access_token) {
+      throw new Error(tokenData?.error_description || tokenData?.error || 'Gagal memperbarui token SSO Ely.by');
+    }
+
+    session.accessToken = tokenData.access_token;
+    if (tokenData.refresh_token) session.refreshToken = tokenData.refresh_token;
+    session.expiresAt = Date.now() + (Number(tokenData.expires_in) || 86400) * 1000;
+
+    setSsoCookie(res, sid);
+    return res.json({
+      authenticated: true,
+      expiresAt: session.expiresAt,
+      user: session.user,
+    });
+  } catch (err: any) {
+    return res.status(401).json({ error: err?.message || 'Gagal refresh SSO Ely.by' });
+  }
+});
+
+// 5. Logout Ely.by SSO Session
+app.post('/api/auth/elyby/logout', (req, res) => {
+  const cookies = parseCookies(req.headers.cookie);
+  const sid = cookies[ELYBY_COOKIE_NAME];
+  if (sid) {
+    elybySsoSessions.delete(sid);
+  }
+  res.clearCookie(ELYBY_COOKIE_NAME, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    path: '/',
+  });
+  return res.json({ success: true });
+});
 
 // Initialize Gemini API client for Craft AI
 // AI Studio automatically injects GEMINI_API_KEY environment variable.

@@ -34,6 +34,11 @@ import { CommunityChatPage, ChatRoom } from './components/CommunityChatPage';
 import { ShieldCheck, Sparkles, Compass, Crown, MessageSquare } from 'lucide-react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, isStrictAdminEmail, signOutFirebase } from './lib/firebase';
+import {
+  checkElyBySsoSession,
+  buildElyByProfileFromSso,
+  logoutElyBySso,
+} from './lib/elybyOAuth';
 
 export default function App() {
   // Initial Flow States
@@ -186,6 +191,45 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // Verify active Ely.by SSO cookie session on boot
+  useEffect(() => {
+    let cancelled = false;
+    void checkElyBySsoSession().then((sso) => {
+      if (cancelled || !sso?.authenticated || !sso.user) return;
+      setCurrentUser((prev) => {
+        if (!prev) {
+          const ssoUser = buildElyByProfileFromSso(sso);
+          setHasCompletedInitialLogin(true);
+          try {
+            localStorage.setItem('minelaunch_user', JSON.stringify(ssoUser));
+          } catch {
+            // ignore
+          }
+          return ssoUser;
+        }
+        if (prev.provider === 'elyby' || prev.elybySsoVerified) {
+          const updated: UserProfile = {
+            ...prev,
+            elybyUuid: sso.user!.uuid,
+            elybyProfileLink: sso.user!.profileLink,
+            elybySsoVerified: true,
+            ssoExpiresAt: sso.expiresAt,
+          };
+          try {
+            localStorage.setItem('minelaunch_user', JSON.stringify(updated));
+          } catch {
+            // ignore
+          }
+          return updated;
+        }
+        return prev;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleOpenSettings = (tab: 'appearance' | 'profile' | 'android' | 'security' = 'appearance') => {
     setSettingsTab(tab);
     setIsSettingsOpen(true);
@@ -239,6 +283,7 @@ export default function App() {
 
   const handleLogout = () => {
     void signOutFirebase();
+    void logoutElyBySso();
     setCurrentUser(null);
     setHasCompletedInitialLogin(false);
     try {
