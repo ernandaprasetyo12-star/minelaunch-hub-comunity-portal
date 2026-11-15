@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldCheck, ShieldAlert, Sparkles, Layers, BookOpen, BarChart3, Compass, MessageSquare } from 'lucide-react';
 import { AppViewMode } from './Navbar';
+import { resolvePublicAssetUrl } from '../utils/assetUrl';
 
 interface FooterProps {
   onNavigate: (view: AppViewMode) => void;
@@ -14,7 +15,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenTour,
 }) => {
   return (
-    <footer className="border-t border-neutral-800 bg-neutral-950 py-12 text-xs text-neutral-400">
+    <footer className="border-t border-white/[0.08] bg-[#0e1015]/80 backdrop-blur-xl py-12 text-xs text-neutral-400">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
           {/* Brand Info with authentic Minelaunch Hub logo */}
@@ -27,7 +28,7 @@ export const Footer: React.FC<FooterProps> = ({
               className="flex items-center gap-2.5 text-left group"
             >
               <img
-                src="/assets/minelaunch_hub_logo.png"
+                src={resolvePublicAssetUrl('/assets/minelaunch_hub_logo.png')}
                 alt="MineLaunch Hub Logo"
                 className="h-9 w-9 rounded-lg object-cover ring-1 ring-emerald-500/40 group-hover:ring-emerald-400 transition-all"
               />
@@ -178,11 +179,16 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* Disclaimer & Copyright */}
-        <div className="pt-6 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500">
-          <div>
-            MineLaunch Hub adalah inisiatif edukasi komunitas independen. Minecraft adalah merek dagang terdaftar milik Mojang Studios / Microsoft.
+        <div className="pt-6 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-400 text-center sm:text-left">
+          <div className="space-y-1">
+            <div className="font-mono text-neutral-300">
+              © 2025 Community Minecraft Hub. All rights reserved.
+            </div>
+            <div className="text-neutral-500">
+              Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
+            </div>
           </div>
-          <div>
+          <div className="text-neutral-500 shrink-0">
             100% Netral · Bebas Iklan · Melindungi Komunitas Pemain
           </div>
         </div>

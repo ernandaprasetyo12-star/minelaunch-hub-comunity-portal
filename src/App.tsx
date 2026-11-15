@@ -17,7 +17,6 @@ import { WikipediaInvestigationModal } from './components/WikipediaInvestigation
 import { LauncherDetailModal } from './components/LauncherDetailModal';
 import { SafetyChecklistModal } from './components/SafetyChecklistModal';
 import { SettingsModal } from './components/SettingsModal';
-import { AndroidSystemBar } from './components/AndroidSystemBar';
 import { LicenseGuideSection } from './components/LicenseGuideSection';
 import { ComparisonTable } from './components/ComparisonTable';
 import { LoginModal } from './components/LoginModal';
@@ -129,7 +128,7 @@ export default function App() {
   const [downloadLauncher, setDownloadLauncher] = useState<LauncherItem | null>(null);
   const [isSafetyChecklistOpen, setIsSafetyChecklistOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
-  const [settingsTab, setSettingsTab] = useState<'appearance' | 'profile' | 'android' | 'security'>('appearance');
+  const [settingsTab, setSettingsTab] = useState<'appearance' | 'profile' | 'security'>('appearance');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isTourModalOpen, setIsTourModalOpen] = useState<boolean>(false);
   const [isPotatoModalOpen, setIsPotatoModalOpen] = useState<boolean>(false);
@@ -237,7 +236,7 @@ export default function App() {
     };
   }, []);
 
-  const handleOpenSettings = (tab: 'appearance' | 'profile' | 'android' | 'security' = 'appearance') => {
+  const handleOpenSettings = (tab: 'appearance' | 'profile' | 'security' = 'appearance') => {
     setSettingsTab(tab);
     setIsSettingsOpen(true);
   };
@@ -378,8 +377,15 @@ export default function App() {
     return <InitialLoginGatekeeper onLoginSuccess={handleInitialLoginSuccess} />;
   }
 
+  const fontScaleClass =
+    settings.fontSize === 'large'
+      ? 'text-[17px]'
+      : settings.fontSize === 'compact'
+        ? 'text-[13px]'
+        : '';
+
   return (
-    <div className="relative min-h-screen text-neutral-100 flex flex-col font-sans overflow-x-hidden selection:bg-emerald-500/30 selection:text-emerald-300">
+    <div className={`relative min-h-screen text-neutral-100 flex flex-col font-sans overflow-x-hidden selection:bg-emerald-500/30 selection:text-emerald-300 ${fontScaleClass}`}>
       {/* 
         XMCL ACRYLIC BLURRED BACKGROUND 
         Persis tampilan X Minecraft Launcher: gambar belakang burem dengan acrylic filter
@@ -405,9 +411,9 @@ export default function App() {
         <div className="fixed inset-0 z-0 opacity-20 pointer-events-none bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:28px_28px]" />
       )}
 
-      {/* Main Container Wrapper: Completely separate Live Chat workspace vs Home/Directory Portal */}
+      {/* Main Content Wrapper: Standalone Live Chat vs Portal */}
       {currentView === 'chat' ? (
-        <div className={`relative z-10 h-screen overflow-hidden ${settings.androidDeviceMode === 'phone' ? 'max-w-md mx-auto shadow-2xl border-x border-neutral-800' : ''}`}>
+        <div className="relative z-10 h-screen overflow-hidden">
           <CommunityChatPage
             user={currentUser}
             initialRoom={activeChatRoom}
@@ -419,7 +425,7 @@ export default function App() {
           />
         </div>
       ) : (
-        <div className={`relative z-10 flex flex-col min-h-screen ${settings.androidDeviceMode === 'phone' ? 'max-w-md mx-auto shadow-2xl border-x border-neutral-800' : ''}`}>
+        <div className="relative z-10 flex flex-col min-h-screen">
           {/* Navbar with View Toggles, Brand Logo, and Settings Trigger */}
           <Navbar
             currentView={currentView}
@@ -433,12 +439,12 @@ export default function App() {
           />
 
           {/* Main Content Area */}
-          <main className="flex-1 pb-20">
+          <main className="flex-1 pb-16">
             {/* User Account Bar if logged in */}
             {currentUser && (
-              <div className="bg-neutral-900/60 border-b border-white/5 backdrop-blur-md px-4 py-2">
-                <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-3 text-xs">
-                  <div className="flex items-center gap-2">
+              <div className="bg-neutral-900/60 border-b border-white/5 backdrop-blur-md px-4 py-2.5">
+                <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs">
+                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
                     <span className="text-neutral-400">Akun Aktif:</span>
                     <button 
                       onClick={() => handleOpenSettings('profile')}
@@ -457,44 +463,44 @@ export default function App() {
                         USER BIASA
                       </span>
                     )}
-                    <span className="text-neutral-600">·</span>
+                    <span className="text-neutral-600 hidden sm:inline">·</span>
                     {currentUser.hasOfficialLicense && (
                       <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
-                        <ShieldCheck className="h-3.5 w-3.5" />
+                        <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
                         <span>Lisensi Resmi Mojang</span>
                       </span>
                     )}
                     {currentUser.hasElyBySkin && (
                       <span className="inline-flex items-center gap-1 text-sky-400 font-medium">
-                        <Sparkles className="h-3.5 w-3.5" />
-                        <span>Skin & Jubah Ely.by ({currentUser.skinCapeName})</span>
+                        <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                        <span>Skin &amp; Jubah Ely.by ({currentUser.skinCapeName})</span>
                       </span>
                     )}
                     <button
                       onClick={() => handleNavigate('chat')}
-                      className="inline-flex items-center gap-1 text-teal-300 hover:text-teal-200 font-semibold ml-1"
+                      className="inline-flex items-center gap-1 text-teal-300 hover:text-teal-200 font-semibold"
                     >
-                      <MessageSquare className="h-3.5 w-3.5" />
+                      <MessageSquare className="h-3.5 w-3.5 shrink-0" />
                       <span>Buka Live Chat</span>
                     </button>
                   </div>
 
-                  <div className="text-neutral-400 flex items-center gap-2">
+                  <div className="text-neutral-400 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                     <button
                       onClick={() => handleOpenSettings('profile')}
                       className="text-emerald-400 hover:underline flex items-center gap-1 font-medium"
                     >
-                      <span>Edit Profil & Skin Avatar</span>
+                      <span>Edit Profil</span>
                     </button>
-                    <span>·</span>
+                    <span className="text-neutral-600">·</span>
                     <button
                       onClick={() => setIsTourModalOpen(true)}
                       className="text-neutral-300 hover:text-white flex items-center gap-1"
                     >
-                      <Compass className="h-3 w-3" />
-                      <span>Panduan Tour</span>
+                      <Compass className="h-3 w-3 shrink-0" />
+                      <span>Tour</span>
                     </button>
-                    <span>·</span>
+                    <span className="text-neutral-600">·</span>
                     <button
                       onClick={handleLogout}
                       className="text-red-400 hover:underline"
@@ -509,14 +515,18 @@ export default function App() {
             {/* PAGE 1: BERANDA UTAMA (HOME) */}
             {currentView === 'home' && (
               <HomePage
+                user={currentUser}
                 onNavigate={handleNavigate}
                 onOpenSafetyChecklist={() => setIsSafetyChecklistOpen(true)}
                 onOpenTour={() => setIsTourModalOpen(true)}
-                onOpenSettings={() => setIsSettingsOpen(true)}
+                onOpenSettings={() => handleOpenSettings('appearance')}
+                onOpenProfileSettings={() => handleOpenSettings('profile')}
+                onOpenLogin={() => setIsLoginModalOpen(true)}
                 onOpenPotatoModal={() => setIsPotatoModalOpen(true)}
                 onOpenCraftAi={() => setIsCraftAiOpen(true)}
                 onOpenInvestigation={handleOpenInvestigationWithWarning}
                 onOpenDetail={(launcher) => setDetailLauncher(launcher)}
+                onTriggerDownload={handleTriggerDownload}
                 sampleLaunchers={sampleLaunchers}
               />
             )}
@@ -584,7 +594,7 @@ export default function App() {
             {/* PAGE 8: TENTANG SEMUA: APA ITU MINECRAFT & SISTEM LISENSI */}
             {currentView === 'about' && (
               <div className="space-y-8 pb-12">
-                <div className="border-b border-neutral-800 bg-neutral-900/50 py-10">
+                <div className="border-b border-white/[0.08] bg-[#14161c]/70 backdrop-blur-md py-10">
                   <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
                       Ensiklopedia Komprehensif
@@ -627,16 +637,6 @@ export default function App() {
             onOpenTour={() => setIsTourModalOpen(true)}
           />
         </div>
-      )}
-
-      {/* Android System Bar (Bottom Navigation & Gesture Bar) — Hidden inside standalone Live Chat */}
-      {currentView !== 'chat' && (
-        <AndroidSystemBar
-          currentView={currentView}
-          onNavigate={handleNavigate}
-          onOpenSettings={() => handleOpenSettings('appearance')}
-          settings={settings}
-        />
       )}
 
       {/* Settings Modal (Pengaturan Latar Belakang, Profil & Blur XMCL) */}
@@ -744,12 +744,12 @@ export default function App() {
         onCancel={() => setPendingDangerAction(null)}
       />
 
-      {/* Floating Action Button (FAB) for Craft AI — Hidden inside standalone Live Chat so it doesn't cover Send button */}
+      {/* Floating Action Button (FAB) for Craft AI */}
       {currentView !== 'chat' && (
-        <div className="fixed bottom-20 right-5 z-40">
+        <div className="fixed bottom-5 right-4 sm:right-5 z-40 transition-all">
           <button
             onClick={() => setIsCraftAiOpen(true)}
-            className="group relative flex items-center justify-center h-14 w-14 rounded-full bg-neutral-900 shadow-2xl shadow-emerald-950 hover:scale-110 active:scale-95 ring-4 ring-emerald-500/60 transition-all overflow-hidden"
+            className="group relative flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-neutral-900 shadow-2xl shadow-emerald-950 hover:scale-110 active:scale-95 ring-4 ring-emerald-500/60 transition-all overflow-hidden"
             title="Tanya Craft AI"
           >
             <img
@@ -758,7 +758,7 @@ export default function App() {
               className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
             />
             <div className="absolute inset-0 bg-emerald-500/10 mix-blend-overlay pointer-events-none" />
-            <span className="absolute -top-8 bg-neutral-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-emerald-500/40">
+            <span className="hidden sm:inline-block absolute -top-8 bg-neutral-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-emerald-500/40">
               Tanya Craft AI 🤖
             </span>
           </button>

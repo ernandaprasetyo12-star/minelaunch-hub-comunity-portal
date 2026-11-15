@@ -12,16 +12,16 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
   const [activeTab, setActiveTab] = useState<'official' | 'elyby' | 'dangerous'>('official');
 
   return (
-    <section id="license-guide" className="border-t border-neutral-800 bg-neutral-950 py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
+    <section id="license-guide" className="py-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Section Header */}
-        <div className="max-w-3xl space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+        <div className="max-w-3xl space-y-2.5 border-b border-white/[0.08] pb-5">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#22c55e]">
             <BookOpen className="h-4 w-4" />
-            <span>PUSAT EDUKASI LISENSI & KEAMANAN MINECRAFT</span>
+            <span>PUSAT EDUKASI LISENSI &amp; KEAMANAN MINECRAFT</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            Pahami Lisensi Resmi, Sistem Ely.by & Bahaya Launcher Palsu
+            Pahami Lisensi Resmi, Sistem Ely.by &amp; Bahaya Launcher Palsu
           </h2>
           <p className="text-sm sm:text-base text-neutral-300">
             Panduan lengkap agar Anda tidak salah memilih launcher: ketahui kelebihan lisensi resmi Mojang, cara kerja Ely.by yang bebas virus, serta alasan teknis mengapa launcher seperti TLauncher berbahaya.
@@ -29,48 +29,48 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
         </div>
 
         {/* Interactive Segmented Selector for the 3 Core Topics */}
-        <div className="flex flex-wrap items-center gap-2 p-1.5 bg-neutral-900 border border-neutral-800 rounded-2xl max-w-2xl">
+        <div className="flex flex-wrap items-center gap-2 p-1.5 bg-[#16181e]/85 backdrop-blur-md border border-white/[0.08] rounded-2xl max-w-2xl">
           <button
             onClick={() => setActiveTab('official')}
-            className={`flex-1 min-w-[180px] inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
+            className={`flex-1 min-w-[180px] inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'official'
-                ? 'bg-emerald-950 border border-emerald-700/80 text-emerald-200 shadow-sm'
-                : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+                ? 'bg-[#22c55e] text-neutral-950 shadow-sm'
+                : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <ShieldCheck className="h-4 w-4" />
             <span>1. Minecraft Berlisensi Resmi</span>
           </button>
 
           <button
             onClick={() => setActiveTab('elyby')}
-            className={`flex-1 min-w-[180px] inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
+            className={`flex-1 min-w-[180px] inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'elyby'
-                ? 'bg-sky-950 border border-sky-700/80 text-sky-200 shadow-sm'
-                : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+                ? 'bg-sky-500 text-neutral-950 shadow-sm'
+                : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
-            <Sparkles className="h-4 w-4 text-sky-400" />
+            <Sparkles className="h-4 w-4" />
             <span>2. Ely.by (Bebas Virus)</span>
           </button>
 
           <button
             onClick={() => setActiveTab('dangerous')}
-            className={`flex-1 min-w-[180px] inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
+            className={`flex-1 min-w-[180px] inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'dangerous'
-                ? 'bg-red-950 border border-red-700/80 text-red-200 shadow-sm'
+                ? 'bg-red-600 text-white shadow-sm'
                 : 'text-red-400 hover:text-red-300 hover:bg-red-950/40'
             }`}
           >
-            <AlertTriangle className="h-4 w-4 text-red-400" />
+            <AlertTriangle className="h-4 w-4" />
             <span>3. Apa Itu Launcher Berbahaya?</span>
           </button>
         </div>
 
         {/* Tab 1: APA ITU MINECRAFT YANG MEMBUTUHKAN LISENSI RESMI? */}
         {activeTab === 'official' && (
-          <div className="rounded-2xl border border-emerald-900/60 bg-neutral-900/70 p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#16181e]/80 backdrop-blur-xl p-6 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-5">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
                   Definisi & Penjelasan Lengkap
@@ -155,8 +155,8 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
 
         {/* Tab 2: APA ITU MINECRAFT NON-LISENSI VIA ELY.BY TAPI BEBAS VIRUS? */}
         {activeTab === 'elyby' && (
-          <div className="rounded-2xl border border-sky-900/60 bg-neutral-900/70 p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+          <div className="rounded-2xl border border-sky-500/25 bg-[#16181e]/80 backdrop-blur-xl p-6 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-5">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-sky-400">
                   Solusi Alternatif Aman untuk Non-Lisensi
@@ -165,7 +165,7 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
                   Apa Itu Minecraft Non-Lisensi via Ely.by tapi Bebas Virus?
                 </h3>
               </div>
-              <div className="rounded-lg bg-sky-950/80 border border-sky-800 px-3 py-1.5 text-xs text-sky-300 font-semibold">
+              <div className="rounded-lg bg-sky-500/10 border border-sky-500/25 px-3 py-1.5 text-xs text-sky-300 font-semibold">
                 Status: Aman & Open-Source Audited
               </div>
             </div>
@@ -180,25 +180,25 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
             </div>
 
             {/* Why is it Virus-Free & Safe? */}
-            <div className="rounded-xl border border-sky-900/60 bg-sky-950/20 p-5 space-y-3">
+            <div className="rounded-xl border border-sky-500/20 bg-sky-950/20 p-5 space-y-3">
               <h4 className="text-sm font-bold text-sky-200 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-sky-400" />
                 <span>Mengapa Launcher Ely.by Seperti XMCL & SKLauncher 100% Bebas Virus?</span>
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-neutral-300">
-                <div className="rounded-lg bg-neutral-950 p-3 space-y-1">
+                <div className="rounded-lg border border-white/[0.06] bg-neutral-950/50 p-3 space-y-1">
                   <div className="font-semibold text-white">1. Protokol REST API Terbuka</div>
                   <p className="text-neutral-400">
                     Launcher seperti XMCL dan SKLauncher menggunakan koneksi HTTPS standar ke server Ely.by. Tidak ada file mencurigakan yang diunduh secara diam-diam.
                   </p>
                 </div>
-                <div className="rounded-lg bg-neutral-950 p-3 space-y-1">
+                <div className="rounded-lg border border-white/[0.06] bg-neutral-950/50 p-3 space-y-1">
                   <div className="font-semibold text-white">2. Tidak Mengubah File Sistem</div>
                   <p className="text-neutral-400">
                     Launcher ini <strong>TIDAK PERNAH</strong> memodifikasi file <code>C:\Windows\System32\drivers\etc\hosts</code> atau registry Windows Anda.
                   </p>
                 </div>
-                <div className="rounded-lg bg-neutral-950 p-3 space-y-1">
+                <div className="rounded-lg border border-white/[0.06] bg-neutral-950/50 p-3 space-y-1">
                   <div className="font-semibold text-white">3. Kode Sumber Terbuka (Open Source)</div>
                   <p className="text-neutral-400">
                     Kode XMCL, Pinecone MC, dan Legacy Launcher dapat diperiksa siapa saja di GitHub, bebas dari backdoors dan cryptocurrency miners.
@@ -213,22 +213,22 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
                 Rekomendasi Launcher Non-Lisensi yang Mendukung Ely.by Tanpa Risiko Malware:
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-3 space-y-1">
+                <div className="rounded-xl border border-white/[0.07] bg-neutral-950/50 p-3 space-y-1">
                   <div className="font-bold text-white text-sm">XMCL</div>
                   <div className="text-emerald-400 font-mono text-[11px]">Open Source (MIT)</div>
                   <p className="text-neutral-400 text-[11px]">Paling modern, UI elegan, modpack Modrinth/CurseForge 1-klik, dan dukungan p2p LAN.</p>
                 </div>
-                <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-3 space-y-1">
+                <div className="rounded-xl border border-white/[0.07] bg-neutral-950/50 p-3 space-y-1">
                   <div className="font-bold text-white text-sm">SKLauncher</div>
                   <div className="text-emerald-400 font-mono text-[11px]">Teruji Komunitas</div>
                   <p className="text-neutral-400 text-[11px]">Sangat bersih, ringan, tampilan mirip launcher resmi, sangat ramah pemula di Indonesia.</p>
                 </div>
-                <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-3 space-y-1">
+                <div className="rounded-xl border border-white/[0.07] bg-neutral-950/50 p-3 space-y-1">
                   <div className="font-bold text-white text-sm">Legacy Launcher</div>
                   <div className="text-emerald-400 font-mono text-[11px]">Karya Asli Turikhay</div>
                   <p className="text-neutral-400 text-[11px]">Pencipta asli launcher TL sebelum mereknya dibajak oleh TLMedia. Aman dan stabil.</p>
                 </div>
-                <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-3 space-y-1">
+                <div className="rounded-xl border border-white/[0.07] bg-neutral-950/50 p-3 space-y-1">
                   <div className="font-bold text-white text-sm">PojavLauncher</div>
                   <div className="text-emerald-400 font-mono text-[11px]">HP Android & iOS</div>
                   <p className="text-neutral-400 text-[11px]">Memungkinkan main Minecraft Java asli lengkap dengan skin Ely.by langsung di ponsel.</p>
@@ -254,8 +254,8 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
 
         {/* Tab 3: APA ITU LAUNCHER BERBAHAYA? */}
         {activeTab === 'dangerous' && (
-          <div className="rounded-2xl border border-red-900/80 bg-neutral-900/70 p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+          <div className="rounded-2xl border border-red-500/30 bg-[#16181e]/80 backdrop-blur-xl p-6 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-5">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-red-400">
                   Peringatan Investigasi Keamanan Siber Komunitas
@@ -264,7 +264,7 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
                   Apa Itu Launcher Berbahaya? (Mengapa Ada Peringatan Virus?)
                 </h3>
               </div>
-              <div className="rounded-lg bg-red-950 border border-red-800 px-3 py-1.5 text-xs text-red-300 font-bold">
+              <div className="rounded-lg bg-red-500/15 border border-red-500/30 px-3 py-1.5 text-xs text-red-300 font-bold">
                 Status: KRITIS / DAFTAR HITAM (BLACKLIST)
               </div>
             </div>
@@ -280,7 +280,7 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
 
             {/* 4 Dangers Technical Breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-xl border border-red-900/60 bg-red-950/20 p-4 space-y-2">
+              <div className="rounded-xl border border-red-500/25 bg-red-950/20 p-4 space-y-2">
                 <div className="font-bold text-xs text-red-300 flex items-center gap-2">
                   <Terminal className="h-4 w-4 text-red-400" />
                   <span>1. Pembajakan File Hosts Windows</span>
@@ -290,7 +290,7 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
                 </p>
               </div>
 
-              <div className="rounded-xl border border-red-900/60 bg-red-950/20 p-4 space-y-2">
+              <div className="rounded-xl border border-red-500/25 bg-red-950/20 p-4 space-y-2">
                 <div className="font-bold text-xs text-red-300 flex items-center gap-2">
                   <Lock className="h-4 w-4 text-red-400" />
                   <span>2. Injeksi Pustaka Java Tak Terverifikasi</span>
@@ -300,7 +300,7 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
                 </p>
               </div>
 
-              <div className="rounded-xl border border-red-900/60 bg-red-950/20 p-4 space-y-2">
+              <div className="rounded-xl border border-red-500/25 bg-red-950/20 p-4 space-y-2">
                 <div className="font-bold text-xs text-red-300 flex items-center gap-2">
                   <ShieldAlert className="h-4 w-4 text-red-400" />
                   <span>3. Risiko Pencurian Data (Infostealer) pada Kloning Palsu</span>
@@ -310,7 +310,7 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
                 </p>
               </div>
 
-              <div className="rounded-xl border border-red-900/60 bg-red-950/20 p-4 space-y-2">
+              <div className="rounded-xl border border-red-500/25 bg-red-950/20 p-4 space-y-2">
                 <div className="font-bold text-xs text-red-300 flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-red-400" />
                   <span>4. Pembajakan Merek Dagang & Sensor Komunitas</span>
@@ -322,7 +322,7 @@ export const LicenseGuideSection: React.FC<LicenseGuideSectionProps> = ({ onSele
             </div>
 
             {/* Quick Summary Recommendation */}
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="rounded-xl border border-white/[0.08] bg-neutral-950/50 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="text-xs font-bold text-white">
                   Sudah Terlanjur Menginstal TLauncher di Komputer Anda?

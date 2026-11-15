@@ -1,120 +1,312 @@
+export type ModLoaderType = 'fabric' | 'forge' | 'neoforge' | 'quilt';
+export type ModSourceType = 'modrinth' | 'curseforge' | 'ftb';
+
 export interface ModItem {
   id: string;
   name: string;
   summary: string;
   author: string;
-  source: 'modrinth' | 'curseforge';
+  kind: 'modpack' | 'mod';
+  source: ModSourceType;
+  loaders: ModLoaderType[];
   category: string[];
   downloads: string;
+  downloadsNumeric: number;
   iconUrl: string;
+  previewImages: string[];
   projectUrl: string;
   versions: string[];
+  latestVersion: string;
   license: string;
 }
 
 export const MODS: ModItem[] = [
   {
+    id: 'fabulously-optimized',
+    name: 'Fabulously Optimized',
+    summary:
+      'Modpack berbasis Fabric yang ringan dan fokus pada peningkatan FPS drastis serta dukungan fitur OptiFine penuh untuk laptop maupun PC kentang.',
+    author: 'robotkoer',
+    kind: 'modpack',
+    source: 'modrinth',
+    loaders: ['fabric'],
+    category: ['Optimization', 'Ringan', 'Modpack'],
+    downloads: '18M+',
+    downloadsNumeric: 18000000,
+    iconUrl: '/assets/images/xmcl_community_brand_1794043502660.jpg',
+    previewImages: [
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/prism_launcher_mockup_1794042691402.jpg',
+      '/assets/images/elyby_custom_skin_1794042692330.jpg',
+      '/assets/images/xmcl_community_brand_1794043502660.jpg',
+    ],
+    projectUrl: 'https://modrinth.com/modpack/fabulously-optimized',
+    versions: ['1.19.4', '1.20.1', '1.20.4', '1.21', '1.21.1'],
+    latestVersion: '1.21.1',
+    license: 'MIT',
+  },
+  {
+    id: 'cobblemon-official',
+    name: 'Cobblemon Official Modpack',
+    summary:
+      'Modpack petualangan populer dengan ratusan monster bergaya voxel yang bisa ditangkap, dilatih, dan dipertarungkan bersama teman di server.',
+    author: 'Cobblemon',
+    kind: 'modpack',
+    source: 'modrinth',
+    loaders: ['fabric', 'neoforge'],
+    category: ['Adventure', 'Multiplayer', 'Modpack'],
+    downloads: '12M+',
+    downloadsNumeric: 12000000,
+    iconUrl: '/assets/images/elyby_custom_skin_1794042692330.jpg',
+    previewImages: [
+      '/assets/images/elyby_custom_skin_1794042692330.jpg',
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/curseforge_brand_1794043500690.jpg',
+      '/assets/images/pvp_client_brand_1794043500865.jpg',
+    ],
+    projectUrl: 'https://modrinth.com/modpack/cobblemon-fabric',
+    versions: ['1.20.1', '1.21.1'],
+    latestVersion: '1.21.1',
+    license: 'MPL-2.0',
+  },
+  {
+    id: 'simply-optimized',
+    name: 'Simply Optimized',
+    summary:
+      'Paket optimasi murni tanpa tambahan fitur visual berat untuk menghasilkan frame rate tertinggi dan konsumsi RAM serendah mungkin.',
+    author: 'hypercubemc',
+    kind: 'modpack',
+    source: 'modrinth',
+    loaders: ['fabric', 'quilt'],
+    category: ['Optimization', 'Ringan', 'Modpack'],
+    downloads: '6.5M+',
+    downloadsNumeric: 6500000,
+    iconUrl: '/assets/images/prism_launcher_mockup_1794042691402.jpg',
+    previewImages: [
+      '/assets/images/prism_launcher_mockup_1794042691402.jpg',
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/xmcl_community_brand_1794043502660.jpg',
+      '/assets/images/ftb_technic_brand_1794043501943.jpg',
+    ],
+    projectUrl: 'https://modrinth.com/modpack/sop',
+    versions: ['1.20.1', '1.20.4', '1.21', '1.21.1'],
+    latestVersion: '1.21.1',
+    license: 'GPL-3.0',
+  },
+  {
+    id: 'all-the-mods-9',
+    name: 'All the Mods 9 (ATM9)',
+    summary:
+      'Modpack RPG, teknologi, dan sihir skala besar dari CurseForge dengan ratusan quest progression lengkap untuk permainan jangka panjang.',
+    author: 'ATMTeam',
+    kind: 'modpack',
+    source: 'curseforge',
+    loaders: ['forge', 'neoforge'],
+    category: ['Adventure', 'Magic', 'Modpack'],
+    downloads: '9.8M+',
+    downloadsNumeric: 9800000,
+    iconUrl: '/assets/images/curseforge_brand_1794043500690.jpg',
+    previewImages: [
+      '/assets/images/curseforge_brand_1794043500690.jpg',
+      '/assets/images/ftb_technic_brand_1794043501943.jpg',
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/prism_launcher_mockup_1794042691402.jpg',
+    ],
+    projectUrl: 'https://www.curseforge.com/minecraft/modpacks/all-the-mods-9',
+    versions: ['1.20.1'],
+    latestVersion: '1.20.1',
+    license: 'Custom',
+  },
+  {
+    id: 'ftb-academy',
+    name: 'FTB Skies & Academy',
+    summary:
+      'Seri modpack kurasi Feed The Beast yang dirancang ramah pemula maupun pemain expert untuk belajar otomatisasi mesin dan skyblock modern.',
+    author: 'FTB Team',
+    kind: 'modpack',
+    source: 'ftb',
+    loaders: ['forge', 'neoforge'],
+    category: ['Adventure', 'Magic', 'Modpack'],
+    downloads: '5.2M+',
+    downloadsNumeric: 5200000,
+    iconUrl: '/assets/images/ftb_technic_brand_1794043501943.jpg',
+    previewImages: [
+      '/assets/images/ftb_technic_brand_1794043501943.jpg',
+      '/assets/images/curseforge_brand_1794043500690.jpg',
+      '/assets/images/xmcl_community_brand_1794043502660.jpg',
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+    ],
+    projectUrl: 'https://www.feed-the-beast.com/modpacks',
+    versions: ['1.19.2', '1.20.1'],
+    latestVersion: '1.20.1',
+    license: 'FTB',
+  },
+  {
     id: 'sodium',
     name: 'Sodium',
-    summary: 'A modern rendering engine for Minecraft that greatly improves frame rates and reduces stuttering.',
+    summary:
+      'Engine rendering modern untuk Minecraft Java Edition yang menggandakan frame rate sekaligus menghilangkan micro-stutter saat memuat chunk.',
     author: 'jellysquid3',
+    kind: 'mod',
     source: 'modrinth',
-    category: ['Optimization'],
+    loaders: ['fabric', 'neoforge', 'quilt'],
+    category: ['Optimization', 'Ringan'],
     downloads: '30M+',
+    downloadsNumeric: 30000000,
     iconUrl: 'https://cdn.modrinth.com/data/AAN0M55n/icon.png',
+    previewImages: [
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/prism_launcher_mockup_1794042691402.jpg',
+      '/assets/images/xmcl_community_brand_1794043502660.jpg',
+      '/assets/images/elyby_custom_skin_1794042692330.jpg',
+    ],
     projectUrl: 'https://modrinth.com/mod/sodium',
-    versions: ['1.16.5', '1.18.2', '1.19.4', '1.20.1', '1.21'],
-    license: 'LGPL-3.0'
+    versions: ['1.16.5', '1.18.2', '1.19.4', '1.20.1', '1.21', '1.21.1'],
+    latestVersion: '1.21.1',
+    license: 'LGPL-3.0',
   },
   {
     id: 'iris',
     name: 'Iris Shaders',
-    summary: 'A modern shaders mod for Minecraft intended to be compatible with existing OptiFine shader packs.',
+    summary:
+      'Mod shader berkinerja tinggi yang kompatibel penuh dengan Sodium dan hampir seluruh shaderpack populer seperti Complementary & BSL.',
     author: 'coderbot',
+    kind: 'mod',
     source: 'modrinth',
+    loaders: ['fabric', 'neoforge', 'quilt'],
     category: ['Optimization', 'Visual'],
     downloads: '20M+',
+    downloadsNumeric: 20000000,
     iconUrl: 'https://cdn.modrinth.com/data/yl67vHmb/icon.png',
+    previewImages: [
+      '/assets/images/elyby_custom_skin_1794042692330.jpg',
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/pvp_client_brand_1794043500865.jpg',
+      '/assets/images/xmcl_community_brand_1794043502660.jpg',
+    ],
     projectUrl: 'https://modrinth.com/mod/iris',
-    versions: ['1.16.5', '1.18.2', '1.19.4', '1.20.1', '1.21'],
-    license: 'LGPL-3.0'
+    versions: ['1.16.5', '1.18.2', '1.19.4', '1.20.1', '1.21', '1.21.1'],
+    latestVersion: '1.21.1',
+    license: 'LGPL-3.0',
   },
   {
     id: 'journeymap',
     name: 'JourneyMap',
-    summary: 'Real-time mapping in-game or in a web browser as you explore.',
+    summary:
+      'Pemetaan dunia real-time langsung di dalam permainan ataupun via browser dengan penanda waypoint untuk eksplorasi SMP dan dungeon.',
     author: 'techbrew',
+    kind: 'mod',
     source: 'curseforge',
+    loaders: ['fabric', 'forge', 'neoforge'],
     category: ['Map', 'Utility'],
     downloads: '180M+',
+    downloadsNumeric: 180000000,
     iconUrl: 'https://media.forgecdn.net/avatars/65/925/636142143926504416.png',
+    previewImages: [
+      '/assets/images/curseforge_brand_1794043500690.jpg',
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/prism_launcher_mockup_1794042691402.jpg',
+      '/assets/images/ftb_technic_brand_1794043501943.jpg',
+    ],
     projectUrl: 'https://www.curseforge.com/minecraft/mc-mods/journeymap',
-    versions: ['1.12.2', '1.16.5', '1.18.2', '1.19.2', '1.20.1'],
-    license: 'Custom'
+    versions: ['1.12.2', '1.16.5', '1.18.2', '1.19.2', '1.20.1', '1.21'],
+    latestVersion: '1.21',
+    license: 'Custom',
   },
   {
     id: 'jei',
     name: 'Just Enough Items (JEI)',
-    summary: 'A recipe and item viewing mod for Minecraft, built from the ground up for stability and performance.',
+    summary:
+      'Mod wajib untuk melihat ribuan resep crafting dan kegunaan item secara instan tanpa membebani performa client.',
     author: 'mezz',
+    kind: 'mod',
     source: 'curseforge',
-    category: ['Utility', 'Items'],
+    loaders: ['fabric', 'forge', 'neoforge'],
+    category: ['Utility'],
     downloads: '250M+',
+    downloadsNumeric: 250000000,
     iconUrl: 'https://media.forgecdn.net/avatars/41/498/635905187424177264.png',
+    previewImages: [
+      '/assets/images/prism_launcher_mockup_1794042691402.jpg',
+      '/assets/images/curseforge_brand_1794043500690.jpg',
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/xmcl_community_brand_1794043502660.jpg',
+    ],
     projectUrl: 'https://www.curseforge.com/minecraft/mc-mods/jei',
-    versions: ['1.8.9', '1.12.2', '1.16.5', '1.18.2', '1.19.2', '1.20.1'],
-    license: 'MIT'
+    versions: ['1.12.2', '1.16.5', '1.18.2', '1.19.2', '1.20.1', '1.21'],
+    latestVersion: '1.21',
+    license: 'MIT',
   },
   {
     id: 'lithium',
     name: 'Lithium',
-    summary: 'A general-purpose optimization mod for Minecraft which improves game physics, mob AI, and block ticking.',
+    summary:
+      'Optimasi logika server dan singleplayer (AI mob, fisika blok, dan tick dunia) tanpa mengubah mekanika asli permainan vanilla.',
     author: 'jellysquid3',
+    kind: 'mod',
     source: 'modrinth',
-    category: ['Optimization'],
+    loaders: ['fabric', 'neoforge', 'quilt'],
+    category: ['Optimization', 'Ringan'],
     downloads: '15M+',
+    downloadsNumeric: 15000000,
     iconUrl: 'https://cdn.modrinth.com/data/gv9M7j48/icon.png',
+    previewImages: [
+      '/assets/images/xmcl_community_brand_1794043502660.jpg',
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/prism_launcher_mockup_1794042691402.jpg',
+      '/assets/images/elyby_custom_skin_1794042692330.jpg',
+    ],
     projectUrl: 'https://modrinth.com/mod/lithium',
-    versions: ['1.16.5', '1.18.2', '1.19.4', '1.20.1', '1.21'],
-    license: 'LGPL-3.0'
-  },
-  {
-    id: 'mouse-tweaks',
-    name: 'Mouse Tweaks',
-    summary: 'Enhances inventory management with various mouse-based shortcuts and features.',
-    author: 'YaLTeR',
-    source: 'curseforge',
-    category: ['Utility'],
-    downloads: '120M+',
-    iconUrl: 'https://media.forgecdn.net/avatars/22/33/635338166540306354.png',
-    projectUrl: 'https://www.curseforge.com/minecraft/mc-mods/mouse-tweaks',
-    versions: ['1.7.10', '1.12.2', '1.16.5', '1.18.2', '1.19.2', '1.20.1'],
-    license: 'MIT'
+    versions: ['1.16.5', '1.18.2', '1.19.4', '1.20.1', '1.21', '1.21.1'],
+    latestVersion: '1.21.1',
+    license: 'LGPL-3.0',
   },
   {
     id: 'appleskin',
     name: 'AppleSkin',
-    summary: 'Food HUD improvements to help you manage your hunger and saturation.',
+    summary:
+      'Menampilkan indikator saturasi makanan dan estimasi pemulihan hunger secara akurat langsung di HUD Minecraft.',
     author: 'squeek502',
+    kind: 'mod',
     source: 'modrinth',
-    category: ['Visual', 'HUD'],
+    loaders: ['fabric', 'forge', 'neoforge', 'quilt'],
+    category: ['Visual', 'Utility'],
     downloads: '40M+',
+    downloadsNumeric: 40000000,
     iconUrl: 'https://cdn.modrinth.com/data/EsU8s7e8/icon.png',
+    previewImages: [
+      '/assets/images/pvp_client_brand_1794043500865.jpg',
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/elyby_custom_skin_1794042692330.jpg',
+      '/assets/images/xmcl_community_brand_1794043502660.jpg',
+    ],
     projectUrl: 'https://modrinth.com/mod/appleskin',
-    versions: ['1.12.2', '1.16.5', '1.18.2', '1.19.4', '1.20.1', '1.21'],
-    license: 'Unlicense'
+    versions: ['1.12.2', '1.16.5', '1.18.2', '1.19.4', '1.20.1', '1.21', '1.21.1'],
+    latestVersion: '1.21.1',
+    license: 'Unlicense',
   },
   {
     id: 'waystones',
     name: 'Waystones',
-    summary: 'Adds waystone blocks that players can return to once they have been activated.',
+    summary:
+      'Menambahkan batu teleportasi yang dapat diaktifkan pemain untuk berpindah cepat antar markas di dunia Survival atau Multiplayer.',
     author: 'BlayTheNinth',
+    kind: 'mod',
     source: 'curseforge',
-    category: ['Magic', 'Transport'],
+    loaders: ['fabric', 'forge', 'neoforge'],
+    category: ['Magic', 'Multiplayer'],
     downloads: '80M+',
+    downloadsNumeric: 80000000,
     iconUrl: 'https://media.forgecdn.net/avatars/70/463/636181676609930773.png',
+    previewImages: [
+      '/assets/images/ftb_technic_brand_1794043501943.jpg',
+      '/assets/images/curseforge_brand_1794043500690.jpg',
+      '/assets/images/mc_launchers_hero_1794042691092.jpg',
+      '/assets/images/elyby_custom_skin_1794042692330.jpg',
+    ],
     projectUrl: 'https://www.curseforge.com/minecraft/mc-mods/waystones',
-    versions: ['1.12.2', '1.16.5', '1.18.2', '1.19.2', '1.20.1'],
-    license: 'MIT'
-  }
+    versions: ['1.12.2', '1.16.5', '1.18.2', '1.19.2', '1.20.1', '1.21'],
+    latestVersion: '1.21',
+    license: 'MIT',
+  },
 ];

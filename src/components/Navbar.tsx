@@ -25,7 +25,7 @@ interface NavbarProps {
   onOpenSafetyGuide: () => void;
   onOpenTour: () => void;
   onOpenLogin: () => void;
-  onOpenSettings: (tab?: 'appearance' | 'profile' | 'android' | 'security') => void;
+  onOpenSettings: (tab?: 'appearance' | 'profile' | 'security') => void;
   user: UserProfile | null;
   onLogout: () => void;
 }
@@ -85,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header
       ref={navContainerRef}
-      className="sticky top-0 z-40 w-full border-b border-neutral-800/90 bg-neutral-950/90 backdrop-blur-xl"
+      className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#101217]/80 backdrop-blur-xl"
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         {/* Zone 1: Brand & Contextual Back Button */}
@@ -405,7 +405,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <button
               onClick={onOpenLogin}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-500 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#22c55e] hover:bg-[#16a34a] px-3.5 py-2 text-xs font-bold text-neutral-950 shadow-sm transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               <User className="h-3.5 w-3.5 shrink-0" />
               <span>Masuk</span>
@@ -435,14 +435,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile & Tablet Drawer Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-neutral-800 bg-neutral-950/98 backdrop-blur-xl px-4 py-4 space-y-2 max-h-[80vh] overflow-y-auto">
+        <div className="lg:hidden border-t border-neutral-800 bg-neutral-950/98 backdrop-blur-xl px-4 py-5 space-y-2.5 max-h-[82vh] overflow-y-auto">
           <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
             Menu Utama
           </div>
 
           <button
             onClick={() => handleNavigate('home')}
-            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-3 ${
               currentView === 'home' ? 'bg-emerald-950 border border-emerald-800 text-emerald-400' : 'text-neutral-300 hover:bg-neutral-900'
             }`}
           >
@@ -452,7 +452,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => handleNavigate('servers')}
-            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-3 ${
               currentView === 'servers' ? 'bg-amber-950 border border-amber-800 text-amber-300' : 'text-amber-300 hover:bg-neutral-900'
             }`}
           >
@@ -462,7 +462,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => handleNavigate('mods')}
-            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-3 ${
               currentView === 'mods' ? 'bg-orange-950 border border-orange-800 text-orange-400' : 'text-orange-400 hover:bg-neutral-900'
             }`}
           >
@@ -472,7 +472,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => handleNavigate('chat')}
-            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-3 ${
               currentView === 'chat' ? 'bg-teal-950 border border-teal-800 text-teal-300' : 'text-teal-300 hover:bg-neutral-900'
             }`}
           >
@@ -486,7 +486,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => handleNavigate('catalog')}
-            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-3 ${
               currentView === 'catalog' ? 'bg-emerald-950 border border-emerald-800 text-emerald-400' : 'text-neutral-300 hover:bg-neutral-900'
             }`}
           >
@@ -496,7 +496,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => handleNavigate('licensed')}
-            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-3 ${
               currentView === 'licensed' ? 'bg-emerald-950 border border-emerald-800 text-emerald-400' : 'text-neutral-300 hover:bg-neutral-900'
             }`}
           >
@@ -506,7 +506,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => handleNavigate('non-licensed')}
-            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-3 ${
               currentView === 'non-licensed' ? 'bg-sky-950 border border-sky-800 text-sky-400' : 'text-neutral-300 hover:bg-neutral-900'
             }`}
           >
@@ -516,7 +516,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => handleNavigate('comparison')}
-            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-3 ${
               currentView === 'comparison' ? 'bg-purple-950 border border-purple-800 text-purple-400' : 'text-neutral-300 hover:bg-neutral-900'
             }`}
           >
@@ -530,7 +530,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => handleNavigate('dangerous')}
-            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-3 ${
               currentView === 'dangerous' ? 'bg-red-950 border border-red-800 text-red-400' : 'text-red-400 hover:bg-neutral-900'
             }`}
           >
@@ -540,7 +540,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => handleNavigate('about')}
-            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2.5 ${
+            className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-colors flex items-center gap-3 ${
               currentView === 'about' ? 'bg-emerald-950 border border-emerald-800 text-emerald-400' : 'text-neutral-300 hover:bg-neutral-900'
             }`}
           >
@@ -548,24 +548,33 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Tentang Minecraft &amp; Lisensi</span>
           </button>
 
-          <div className="pt-2 border-t border-neutral-800 flex gap-2">
+          <div className="pt-3 border-t border-neutral-800 grid grid-cols-1 min-[380px]:grid-cols-3 gap-2.5">
             <button
               onClick={() => {
                 setIsMobileMenuOpen(false);
                 onOpenSafetyGuide();
               }}
-              className="flex-1 text-center px-3 py-2 rounded-xl text-xs font-bold bg-red-950/80 text-red-300 border border-red-900"
+              className="text-center px-3 py-2.5 rounded-xl text-xs font-bold bg-red-950/80 text-red-300 border border-red-900"
             >
-              Cek Keamanan PC
+              Cek PC
             </button>
             <button
               onClick={() => {
                 setIsMobileMenuOpen(false);
                 onOpenTour();
               }}
-              className="flex-1 text-center px-3 py-2 rounded-xl text-xs font-bold bg-neutral-900 text-neutral-200 border border-neutral-800"
+              className="text-center px-3 py-2.5 rounded-xl text-xs font-bold bg-neutral-900 text-neutral-200 border border-neutral-800"
             >
               Buka Tour
+            </button>
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                onOpenSettings('appearance');
+              }}
+              className="text-center px-3 py-2.5 rounded-xl text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800/70"
+            >
+              Pengaturan
             </button>
           </div>
         </div>

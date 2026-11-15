@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Sparkles, Terminal, Cpu, HardDrive } from 'lucide-react';
+import { Sparkles, Terminal } from 'lucide-react';
 import { SafeImage } from './SafeImage';
 import { resolvePublicAssetUrl } from '../utils/assetUrl';
 
@@ -70,21 +70,6 @@ export const InitialLoadingScreen: React.FC<InitialLoadingScreenProps> = ({
       {/* Floating subtle voxel grid pattern */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
 
-      {/* Android Status Bar Fake for Mobile Vibe */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-2.5 text-[11px] font-mono text-neutral-400">
-        <span className="font-semibold text-emerald-400">MineLaunch OS</span>
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
-            <Cpu className="h-3 w-3 text-neutral-400" />
-            <span>JVM 21</span>
-          </span>
-          <span className="flex items-center gap-1">
-            <HardDrive className="h-3 w-3 text-neutral-400" />
-            <span>Ready</span>
-          </span>
-        </div>
-      </div>
-
       {/* Center Modal Card */}
       <div className="relative z-10 flex flex-col items-center max-w-sm w-full text-center space-y-6 rounded-3xl border border-white/10 bg-neutral-900/60 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl">
         {/* Animated Authentic Logo with Glow */}
@@ -108,11 +93,11 @@ export const InitialLoadingScreen: React.FC<InitialLoadingScreenProps> = ({
             <span className="text-emerald-400">Hub</span>
           </h1>
           <p className="text-xs text-neutral-300/90 font-medium">
-            XMCL Acrylic Interface & Direktori Java Edition
+            XMCL Acrylic Interface &amp; Direktori Java Edition
           </p>
         </div>
 
-        {/* Custom Minecraft / Android Pill Progress Bar */}
+        {/* Progress Bar */}
         <div className="w-full space-y-2.5">
           <div className="h-2.5 w-full rounded-full bg-neutral-950/80 border border-white/10 p-0.5 overflow-hidden shadow-inner">
             <div
@@ -133,8 +118,11 @@ export const InitialLoadingScreen: React.FC<InitialLoadingScreenProps> = ({
         </div>
 
         {/* Requested Copyright Notice */}
-        <div className="pt-2 border-t border-white/10 text-[10px] text-neutral-400 tracking-wider uppercase font-mono">
-          Community Minecraft Hub 2025 ©
+        <div className="pt-3 border-t border-white/10 text-[10px] text-neutral-400 tracking-wide space-y-1 leading-relaxed">
+          <div className="font-mono">© 2025 Community Minecraft Hub. All rights reserved.</div>
+          <div className="text-neutral-500">
+            Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
+          </div>
         </div>
       </div>
     </div>

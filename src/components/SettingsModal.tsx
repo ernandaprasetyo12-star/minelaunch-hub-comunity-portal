@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
-  Palette, 
-  Smartphone, 
-  Sliders, 
-  ShieldCheck, 
-  Image as ImageIcon, 
-  Check, 
+  Palette,
+  Sliders,
+  ShieldCheck,
+  Image as ImageIcon,
+  Check,
   RotateCcw,
   Volume2,
   Sparkles,
@@ -31,6 +30,7 @@ import { UserProfile } from '../types/auth';
 import { SkinAvatarSelector } from './SkinAvatarSelector';
 import { SafeImage } from './SafeImage';
 import { syncProfileToFirestore } from '../lib/firebase';
+import { resolvePublicAssetUrl } from '../utils/assetUrl';
 import {
   startElyByOAuthPopup,
   refreshElyBySsoSession,
@@ -46,7 +46,7 @@ interface SettingsModalProps {
   onResetSettings: () => void;
   user?: UserProfile | null;
   onUpdateUser?: (updatedUser: UserProfile) => void;
-  defaultTab?: 'appearance' | 'profile' | 'android' | 'security';
+  defaultTab?: 'appearance' | 'profile' | 'security';
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -59,7 +59,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateUser,
   defaultTab = 'appearance',
 }) => {
-  const [activeTab, setActiveTab] = useState<'appearance' | 'profile' | 'android' | 'security'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'appearance' | 'profile' | 'security'>(defaultTab);
   const [customInputUrl, setCustomInputUrl] = useState(settings.customBackgroundUrl || '');
   const [customSaved, setCustomSaved] = useState(false);
 
@@ -110,7 +110,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         className="relative w-full max-w-2xl rounded-3xl border border-neutral-800 bg-neutral-900/95 shadow-2xl backdrop-blur-2xl flex flex-col max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header - Android Material You Style */}
+        {/* Header */}
         <div className="flex items-center justify-between border-b border-neutral-800/80 px-6 py-4.5 bg-neutral-950/60">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">
@@ -120,11 +120,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
                 <span>Pengaturan Sistem</span>
                 <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800 font-mono">
-                  Android & XMCL
+                  XMCL Acrylic
                 </span>
               </h2>
               <p className="text-xs text-neutral-400">
-                Sesuaikan efek blur XMCL, latar belakang, & antarmuka perangkat
+                Sesuaikan efek blur XMCL, latar belakang, profil &amp; keamanan
               </p>
             </div>
           </div>
@@ -162,18 +162,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           >
             <User className="h-4 w-4" />
             <span>Profil Akun Saya</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('android')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all shrink-0 ${
-              activeTab === 'android'
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950'
-                : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
-            }`}
-          >
-            <Smartphone className="h-4 w-4" />
-            <span>Mode Android UI</span>
           </button>
 
           <button
@@ -310,7 +298,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       >
                         <div className="relative h-14 w-20 rounded-xl overflow-hidden shrink-0 border border-neutral-700 bg-neutral-900">
                           <img
-                            src={preset.url}
+                            src={resolvePublicAssetUrl(preset.url)}
                             alt={preset.name}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform"
                           />
@@ -377,6 +365,52 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   type="checkbox"
                   checked={settings.enableVoxelParticles}
                   onChange={(e) => onUpdateSettings({ enableVoxelParticles: e.target.checked })}
+                  className="h-5 w-5 accent-emerald-500 rounded cursor-pointer"
+                />
+              </div>
+
+              {/* Font Size Selector */}
+              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4 space-y-3">
+                <span className="text-sm font-bold text-white block">
+                  Ukuran Teks Antarmuka:
+                </span>
+                <div className="grid grid-cols-3 gap-2.5 text-xs">
+                  {[
+                    { id: 'compact', label: 'Ringkas', desc: 'Lebih kecil' },
+                    { id: 'normal', label: 'Normal', desc: 'Standar nyaman' },
+                    { id: 'large', label: 'Besar', desc: 'Lebih jelas' },
+                  ].map((sz) => (
+                    <button
+                      key={sz.id}
+                      onClick={() => onUpdateSettings({ fontSize: sz.id as any })}
+                      className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                        settings.fontSize === sz.id
+                          ? 'border-emerald-500 bg-emerald-950 text-emerald-300'
+                          : 'border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      <div className="font-bold">{sz.label}</div>
+                      <div className="text-[10px] text-neutral-400 mt-0.5">{sz.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sound toggle */}
+              <div className="flex items-center justify-between rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4">
+                <div className="space-y-0.5">
+                  <span className="text-sm font-bold text-white flex items-center gap-1.5">
+                    <Volume2 className="h-4 w-4 text-emerald-400" />
+                    <span>Efek Suara Klik Voxel</span>
+                  </span>
+                  <p className="text-xs text-neutral-400">
+                    Suara klik tombol bergaya Minecraft saat tombol ditekan
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settings.soundEffects}
+                  onChange={(e) => onUpdateSettings({ soundEffects: e.target.checked })}
                   className="h-5 w-5 accent-emerald-500 rounded cursor-pointer"
                 />
               </div>
@@ -760,105 +794,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           )}
 
-          {/* TAB 2: ANDROID VIEW SETTINGS */}
-          {activeTab === 'android' && (
-            <div className="space-y-6">
-              {/* Device Mode Selector */}
-              <div className="space-y-3">
-                <label className="text-xs font-bold uppercase tracking-wider text-neutral-400">
-                  Mode Tata Letak Tampilan:
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {[
-                    { id: 'auto', label: 'Otomatis', desc: 'Sesuai Layar' },
-                    { id: 'phone', label: 'HP Android', desc: 'Pojav / XMCL UI' },
-                    { id: 'tablet', label: 'Tablet Android', desc: 'Layar Lebar' },
-                    { id: 'desktop', label: 'Desktop PC', desc: 'Standar Web' },
-                  ].map((mode) => (
-                    <button
-                      key={mode.id}
-                      onClick={() => onUpdateSettings({ androidDeviceMode: mode.id as any })}
-                      className={`p-3 rounded-2xl border text-left transition-all ${
-                        settings.androidDeviceMode === mode.id
-                          ? 'border-emerald-500 bg-emerald-950/40 text-emerald-300 ring-2 ring-emerald-500/30'
-                          : 'border-neutral-800 bg-neutral-950/60 text-neutral-400 hover:border-neutral-700 hover:text-white'
-                      }`}
-                    >
-                      <div className="text-xs font-bold">{mode.label}</div>
-                      <div className="text-[10px] text-neutral-400 mt-0.5">{mode.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
 
-              {/* Android Bottom Navigation Bar Style */}
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4.5 space-y-3">
-                <span className="text-sm font-bold text-white flex items-center gap-2">
-                  <Smartphone className="h-4 w-4 text-emerald-400" />
-                  <span>Gaya Navigasi Bawah Android:</span>
-                </span>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  {[
-                    { id: 'gestures', label: 'Gesture Bar', desc: 'Minimalis modern' },
-                    { id: '3-buttons', label: '3 Tombol', desc: 'Kembali, Home, Menu' },
-                    { id: 'hidden', label: 'Sembunyikan', desc: 'Layar Penuh' },
-                  ].map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => onUpdateSettings({ androidNavbarStyle: item.id as any })}
-                      className={`p-2.5 rounded-xl border text-center transition-all ${
-                        settings.androidNavbarStyle === item.id
-                          ? 'border-emerald-500 bg-emerald-950 text-emerald-300'
-                          : 'border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      <div className="font-bold">{item.label}</div>
-                      <div className="text-[10px] text-neutral-400 mt-0.5">{item.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sound & Haptics */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4">
-                  <div className="space-y-0.5">
-                    <span className="text-sm font-bold text-white flex items-center gap-1.5">
-                      <Volume2 className="h-4 w-4 text-emerald-400" />
-                      <span>Efek Suara Klik Voxel</span>
-                    </span>
-                    <p className="text-xs text-neutral-400">
-                      Suara klik tombol bergaya Minecraft saat tombol ditekan
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.soundEffects}
-                    onChange={(e) => onUpdateSettings({ soundEffects: e.target.checked })}
-                    className="h-5 w-5 accent-emerald-500 rounded cursor-pointer"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4">
-                  <div className="space-y-0.5">
-                    <span className="text-sm font-bold text-white flex items-center gap-1.5">
-                      <Smartphone className="h-4 w-4 text-emerald-400" />
-                      <span>Getaran Haptic Feedback (Di HP)</span>
-                    </span>
-                    <p className="text-xs text-neutral-400">
-                      Getaran halus di layar sentuh saat membuka launcher
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.hapticFeedback}
-                    onChange={(e) => onUpdateSettings({ hapticFeedback: e.target.checked })}
-                    className="h-5 w-5 accent-emerald-500 rounded cursor-pointer"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* TAB 3: SECURITY PREFERENCES */}
           {activeTab === 'security' && (

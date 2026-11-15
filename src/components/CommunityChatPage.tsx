@@ -86,7 +86,7 @@ interface CommunityChatPageProps {
   onLoginSuccess: (user: UserProfile) => void;
   onNavigate: (view: AppViewMode) => void;
   onOpenCraftAi: () => void;
-  onOpenSettings: (tab?: 'appearance' | 'profile' | 'android' | 'security') => void;
+  onOpenSettings: (tab?: 'appearance' | 'profile' | 'security') => void;
 }
 
 const ROOMS: Array<{

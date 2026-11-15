@@ -24,14 +24,14 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
   const comparedLaunchers = LAUNCHERS.filter((l) => sampleLauncherIds.includes(l.id));
 
   return (
-    <section className="border-t border-neutral-800 bg-neutral-950 py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+    <section className="py-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="space-y-2 border-b border-white/[0.08] pb-5">
+          <div className="text-xs font-semibold uppercase tracking-wider text-[#22c55e]">
             Tabel Komparasi Head-to-Head
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            Perbandingan Fitur, Lisensi & Keamanan Launcher
+            Perbandingan Fitur, Lisensi &amp; Keamanan Launcher
           </h2>
           <p className="text-sm text-neutral-300 max-w-2xl">
             Lihat perbedaan krusial antara launcher resmi berbayar, alternatif aman via Ely.by, dan launcher berisiko yang harus Anda hindari.
@@ -39,10 +39,10 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
         </div>
 
         {/* Responsive Table Wrapper */}
-        <div className="overflow-x-auto rounded-2xl border border-neutral-800 bg-neutral-900/60 shadow-xl">
+        <div className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-[#16181e]/80 backdrop-blur-xl shadow-2xl">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-neutral-800 bg-neutral-950 text-neutral-300 font-semibold">
+              <tr className="border-b border-white/[0.08] bg-neutral-950/70 text-neutral-300 font-semibold">
                 <th className="py-4 px-4 sm:px-6">Nama Launcher</th>
                 <th className="py-4 px-3 whitespace-nowrap">Wajib Beli Akun?</th>
                 <th className="py-4 px-3 whitespace-nowrap">Dukung Ely.by?</th>
