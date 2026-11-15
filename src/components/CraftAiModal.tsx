@@ -9,7 +9,8 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { resolvePublicAssetUrl } from '../utils/assetUrl';
-import { getApiUrl, getApiBaseUrl, isStaticHosting } from '../utils/apiBase';
+import { getApiUrl, isStaticHosting } from '../utils/apiBase';
+import { answerWithStaticCraftAi } from '../utils/staticCraftAi';
 
 interface GroundingSource {
   title: string;
@@ -66,11 +67,17 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
         .slice(-8)
         .map((m) => ({ role: m.role, text: m.text }));
 
+      const controller = new AbortController();
+      const timeoutMs = isStaticHosting() ? 6000 : 25000;
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
       const res = await fetch(getApiUrl('/api/craft-ai'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMsg.text, history }),
+        signal: controller.signal,
       });
+      clearTimeout(timer);
 
       const contentType = res.headers.get('content-type') || '';
       const data = contentType.includes('application/json') ? await res.json() : null;
@@ -84,38 +91,49 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
             sources: Array.isArray(data.sources) ? data.sources : undefined,
           },
         ]);
+      } else if (isStaticHosting() && (res.status === 404 || res.status >= 500)) {
+        const fallback = await answerWithStaticCraftAi(userMsg.text);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'model',
+            text: fallback.reply,
+            sources: fallback.sources,
+          },
+        ]);
       } else {
-        let errorMessage = '';
-        if (res.status === 404) {
-          const targetBackend = getApiBaseUrl();
-          errorMessage = isStaticHosting()
-            ? `Backend Craft AI di (${targetBackend}) belum aktif/dipublikasikan (status 404). Klik tombol Share/Publish di AI Studio atau atur variabel VITE_API_BASE_URL di GitHub Actions ke URL server backend Anda.`
-            : 'Endpoint Craft AI (/api/craft-ai) belum merespons (404). Muat ulang halaman atau pastikan server backend Node.js sedang berjalan.';
-        } else {
-          const errorDetail =
-            data?.details || data?.error || `Server merespons status ${res.status}`;
-          errorMessage = `Maaf, Craft AI belum bisa merespons saat ini (${errorDetail}).`;
-        }
+        const errorDetail =
+          data?.details || data?.error || `Server merespons status ${res.status}`;
         setMessages((prev) => [
           ...prev,
           {
             role: 'model',
             isError: true,
-            text: errorMessage,
+            text: `Maaf, Craft AI belum bisa merespons saat ini (${errorDetail}).`,
           },
         ]);
       }
     } catch (err: any) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'model',
-          isError: true,
-          text: isStaticHosting()
-            ? `Tidak dapat menjangkau server backend Craft AI dari GitHub Pages (${err?.message || 'Network/CORS error'}). Pastikan Shared App AI Studio sudah dipublikasikan atau server backend Anda aktif.`
-            : `Koneksi ke server Craft AI terputus (${err?.message || 'Network error'}). Silakan periksa koneksi internet dan coba lagi.`,
-        },
-      ]);
+      if (isStaticHosting()) {
+        const fallback = await answerWithStaticCraftAi(userMsg.text);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'model',
+            text: fallback.reply,
+            sources: fallback.sources,
+          },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'model',
+            isError: true,
+            text: `Koneksi ke server Craft AI terputus (${err?.message || 'Network error'}). Silakan periksa koneksi internet dan coba lagi.`,
+          },
+        ]);
+      }
     } finally {
       setIsLoading(false);
     }
