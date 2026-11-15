@@ -31,6 +31,7 @@ import { MineLaunchDownloadModal } from './components/MineLaunchDownloadModal';
 import { ServersPage } from './components/ServersPage';
 import { ModsPage } from './components/ModsPage';
 import { CommunityChatPage, ChatRoom } from './components/CommunityChatPage';
+import { DangerWarningConfirmModal } from './components/DangerWarningConfirmModal';
 import { ShieldCheck, Sparkles, Compass, Crown, MessageSquare } from 'lucide-react';
 import { resolvePublicAssetUrl } from './utils/assetUrl';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -133,6 +134,11 @@ export default function App() {
   const [isTourModalOpen, setIsTourModalOpen] = useState<boolean>(false);
   const [isPotatoModalOpen, setIsPotatoModalOpen] = useState<boolean>(false);
   const [isCraftAiOpen, setIsCraftAiOpen] = useState<boolean>(false);
+  const [pendingDangerAction, setPendingDangerAction] = useState<
+    | { type: 'page' }
+    | { type: 'dossier'; launcher: LauncherItem }
+    | null
+  >(null);
 
   // User state (sanitize localStorage so role: 'admin' cannot be spoofed without Firebase Auth)
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
@@ -245,7 +251,7 @@ export default function App() {
     }
   };
 
-  const handleNavigate = (view: AppViewMode) => {
+  const executeNavigate = (view: AppViewMode) => {
     setCurrentView(view);
     if (view === 'chat') {
       window.history.pushState(null, '', `#live-chat/${activeChatRoom}`);
@@ -253,6 +259,32 @@ export default function App() {
       window.history.pushState(null, '', window.location.pathname + window.location.search);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigate = (view: AppViewMode) => {
+    if (view === 'dangerous' && currentView !== 'dangerous') {
+      setPendingDangerAction({ type: 'page' });
+      return;
+    }
+    executeNavigate(view);
+  };
+
+  const handleOpenInvestigationWithWarning = (launcher: LauncherItem) => {
+    if (currentView === 'dangerous') {
+      setInvestigationLauncher(launcher);
+      return;
+    }
+    setPendingDangerAction({ type: 'dossier', launcher });
+  };
+
+  const handleConfirmDangerWarning = () => {
+    if (!pendingDangerAction) return;
+    const action = pendingDangerAction;
+    setPendingDangerAction(null);
+    executeNavigate('dangerous');
+    if (action.type === 'dossier') {
+      setInvestigationLauncher(action.launcher);
+    }
   };
 
   const handleChatRoomChange = (room: ChatRoom) => {
@@ -308,8 +340,7 @@ export default function App() {
   // Handler when clicking download or card action
   const handleTriggerDownload = (launcher: LauncherItem) => {
     if (launcher.category === 'dangerous') {
-      // Open Wikipedia warning dossier modal immediately!
-      setInvestigationLauncher(launcher);
+      handleOpenInvestigationWithWarning(launcher);
     } else {
       setDownloadLauncher(launcher);
     }
@@ -484,7 +515,7 @@ export default function App() {
                 onOpenSettings={() => setIsSettingsOpen(true)}
                 onOpenPotatoModal={() => setIsPotatoModalOpen(true)}
                 onOpenCraftAi={() => setIsCraftAiOpen(true)}
-                onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
+                onOpenInvestigation={handleOpenInvestigationWithWarning}
                 onOpenDetail={(launcher) => setDetailLauncher(launcher)}
                 sampleLaunchers={sampleLaunchers}
               />
@@ -496,7 +527,7 @@ export default function App() {
                 launchers={LAUNCHERS}
                 onNavigate={handleNavigate}
                 onOpenDetail={(launcher) => setDetailLauncher(launcher)}
-                onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
+                onOpenInvestigation={handleOpenInvestigationWithWarning}
                 onTriggerDownload={handleTriggerDownload}
               />
             )}
@@ -507,7 +538,7 @@ export default function App() {
                 launchers={LAUNCHERS}
                 onNavigate={handleNavigate}
                 onOpenDetail={(launcher) => setDetailLauncher(launcher)}
-                onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
+                onOpenInvestigation={handleOpenInvestigationWithWarning}
                 onTriggerDownload={handleTriggerDownload}
               />
             )}
@@ -518,7 +549,7 @@ export default function App() {
                 launchers={LAUNCHERS}
                 onNavigate={handleNavigate}
                 onOpenDetail={(launcher) => setDetailLauncher(launcher)}
-                onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
+                onOpenInvestigation={handleOpenInvestigationWithWarning}
                 onTriggerDownload={handleTriggerDownload}
               />
             )}
@@ -529,7 +560,7 @@ export default function App() {
                 launchers={LAUNCHERS}
                 onNavigate={handleNavigate}
                 onOpenDetail={(launcher) => setDetailLauncher(launcher)}
-                onOpenInvestigation={(launcher) => setInvestigationLauncher(launcher)}
+                onOpenInvestigation={handleOpenInvestigationWithWarning}
                 onTriggerDownload={handleTriggerDownload}
                 onOpenSafetyChecklist={() => setIsSafetyChecklistOpen(true)}
               />
@@ -583,7 +614,7 @@ export default function App() {
               <div className="py-8">
                 <ComparisonTable
                   onOpenDetails={(item) => setDetailLauncher(item)}
-                  onOpenInvestigation={(item) => setInvestigationLauncher(item)}
+                  onOpenInvestigation={handleOpenInvestigationWithWarning}
                 />
               </div>
             )}
@@ -638,7 +669,7 @@ export default function App() {
           onClose={() => setDetailLauncher(null)}
           onOpenInvestigation={(item) => {
             setDetailLauncher(null);
-            setInvestigationLauncher(item);
+            handleOpenInvestigationWithWarning(item);
           }}
           onTriggerDownload={(item) => {
             setDetailLauncher(null);
@@ -655,7 +686,7 @@ export default function App() {
           onClose={() => setDownloadLauncher(null)}
           onOpenInvestigation={(item) => {
             setDownloadLauncher(null);
-            setInvestigationLauncher(item);
+            handleOpenInvestigationWithWarning(item);
           }}
         />
       )}
@@ -699,6 +730,18 @@ export default function App() {
       <CraftAiModal
         isOpen={isCraftAiOpen}
         onClose={() => setIsCraftAiOpen(false)}
+      />
+
+      {/* Warning Confirmation Modal before entering Investigasi Bahaya */}
+      <DangerWarningConfirmModal
+        isOpen={!!pendingDangerAction}
+        targetName={
+          pendingDangerAction?.type === 'dossier'
+            ? `Investigasi ${pendingDangerAction.launcher.name}`
+            : 'Investigasi Bahaya'
+        }
+        onConfirm={handleConfirmDangerWarning}
+        onCancel={() => setPendingDangerAction(null)}
       />
 
       {/* Floating Action Button (FAB) for Craft AI — Hidden inside standalone Live Chat so it doesn't cover Send button */}
