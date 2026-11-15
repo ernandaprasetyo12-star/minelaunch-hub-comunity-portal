@@ -1,4 +1,5 @@
 import { UserProfile } from '../types/auth';
+import { getApiUrl } from '../utils/apiBase';
 
 export interface ElyBySsoUserData {
   id: number;
@@ -55,7 +56,7 @@ export async function startElyByOAuthPopup(options: {
   onCancel?: () => void;
   avatarOverride?: string;
 }): Promise<void> {
-  const res = await fetch('/api/auth/elyby/url', { credentials: 'include' });
+  const res = await fetch(getApiUrl('/api/auth/elyby/url'), { credentials: 'include' });
   const contentType = res.headers.get('content-type') || '';
   if (!res.ok || !contentType.includes('application/json')) {
     throw new Error('Server backend OAuth Ely.by tidak aktif pada deployment statis ini.');
@@ -129,7 +130,7 @@ export async function startElyByOAuthPopup(options: {
 
 export async function checkElyBySsoSession(): Promise<ElyBySsoPayload | null> {
   try {
-    const res = await fetch('/api/auth/elyby/session', { credentials: 'include' });
+    const res = await fetch(getApiUrl('/api/auth/elyby/session'), { credentials: 'include' });
     const ct = res.headers.get('content-type') || '';
     if (!res.ok || !ct.includes('application/json')) return null;
     return await res.json();
@@ -140,7 +141,7 @@ export async function checkElyBySsoSession(): Promise<ElyBySsoPayload | null> {
 
 export async function refreshElyBySsoSession(): Promise<ElyBySsoPayload | null> {
   try {
-    const res = await fetch('/api/auth/elyby/refresh', {
+    const res = await fetch(getApiUrl('/api/auth/elyby/refresh'), {
       method: 'POST',
       credentials: 'include',
     });
@@ -154,7 +155,7 @@ export async function refreshElyBySsoSession(): Promise<ElyBySsoPayload | null> 
 
 export async function logoutElyBySso(): Promise<void> {
   try {
-    await fetch('/api/auth/elyby/logout', {
+    await fetch(getApiUrl('/api/auth/elyby/logout'), {
       method: 'POST',
       credentials: 'include',
     });

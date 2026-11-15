@@ -13,6 +13,43 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+// Enable CORS for static deployments (GitHub Pages, Netlify, etc.) calling Craft AI / OAuth APIs
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^https:\/\/[a-z0-9-]+\.github\.io$/i,
+  /^https:\/\/[a-z0-9-]+\.netlify\.app$/i,
+  /^https:\/\/[a-z0-9-]+\.pages\.dev$/i,
+  /^https:\/\/[a-z0-9-]+\.vercel\.app$/i,
+  /^https:\/\/[a-z0-9-]+\.run\.app$/i,
+  /^http:\/\/localhost(?::\d+)?$/i,
+  /^http:\/\/127\.0\.0\.1(?::\d+)?$/i,
+];
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const extraOrigin = process.env.ALLOWED_CORS_ORIGIN?.trim();
+  const isAllowed =
+    !!origin &&
+    (ALLOWED_ORIGIN_PATTERNS.some((re) => re.test(origin)) ||
+      (extraOrigin && origin === extraOrigin));
+
+  if (isAllowed && origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  return next();
+});
+
+app.get('/api/health', (_req, res) => {
+  res.json({ ok: true, service: 'minelaunch-hub' });
+});
+
 // ---------------------------------------------------------------------------
 // Ely.by OAuth2 & SSO Session Management
 // ---------------------------------------------------------------------------

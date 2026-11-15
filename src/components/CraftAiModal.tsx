@@ -9,6 +9,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { resolvePublicAssetUrl } from '../utils/assetUrl';
+import { getApiUrl, getApiBaseUrl, isStaticHosting } from '../utils/apiBase';
 
 interface GroundingSource {
   title: string;
@@ -65,7 +66,7 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
         .slice(-8)
         .map((m) => ({ role: m.role, text: m.text }));
 
-      const res = await fetch('/api/craft-ai', {
+      const res = await fetch(getApiUrl('/api/craft-ai'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMsg.text, history }),
@@ -86,8 +87,10 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
       } else {
         let errorMessage = '';
         if (res.status === 404) {
-          errorMessage =
-            'Endpoint Craft AI (/api/craft-ai) belum merespons (404). Jika Anda membuka halaman versi lama atau link Share sebelum update terbaru, muat ulang halaman atau publikasikan ulang aplikasi agar server backend aktif.';
+          const targetBackend = getApiBaseUrl();
+          errorMessage = isStaticHosting()
+            ? `Backend Craft AI di (${targetBackend}) belum aktif/dipublikasikan (status 404). Klik tombol Share/Publish di AI Studio atau atur variabel VITE_API_BASE_URL di GitHub Actions ke URL server backend Anda.`
+            : 'Endpoint Craft AI (/api/craft-ai) belum merespons (404). Muat ulang halaman atau pastikan server backend Node.js sedang berjalan.';
         } else {
           const errorDetail =
             data?.details || data?.error || `Server merespons status ${res.status}`;
@@ -108,7 +111,9 @@ export const CraftAiModal: React.FC<CraftAiModalProps> = ({ isOpen, onClose }) =
         {
           role: 'model',
           isError: true,
-          text: `Koneksi ke server Craft AI terputus (${err?.message || 'Network error'}). Silakan periksa koneksi internet dan coba lagi.`,
+          text: isStaticHosting()
+            ? `Tidak dapat menjangkau server backend Craft AI dari GitHub Pages (${err?.message || 'Network/CORS error'}). Pastikan Shared App AI Studio sudah dipublikasikan atau server backend Anda aktif.`
+            : `Koneksi ke server Craft AI terputus (${err?.message || 'Network error'}). Silakan periksa koneksi internet dan coba lagi.`,
         },
       ]);
     } finally {

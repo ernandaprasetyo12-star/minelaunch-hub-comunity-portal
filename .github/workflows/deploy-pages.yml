@@ -30,6 +30,8 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Build production bundle
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
         run: npm run build
 
       - name: Ensure .nojekyll and SPA 404 fallback
